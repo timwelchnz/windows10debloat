@@ -1,17 +1,26 @@
 ﻿# TO RUN THIS SCRIPT FIRST CUT&PASTE & RUN THE BELOW LINE OUTSIDE OF THIS SCRIPT
 # Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
+
+#Add Windows Forms Assembly as it seems to be missing on a lot of machines
 Add-Type -AssemblyName System.Windows.Forms
+
 Clear-Host
-#We're immediately going to remove all of the below... and afterwards loop through the remaining...
+
+#Unpin Microsoft Store from Taskbar - https://docs.microsoft.com/en-us/answers/questions/214599/unpin-icons-from-taskbar-in-windows-10-20h2.html
+$appname = "Microsoft Store"
+((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name -eq $appname}).Verbs() | ?{$_.Name.replace('&','') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
+
+#Set Search Bar to Icon
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
+$Name = "SearchboxTaskbarMode"
+$value = "1"
+
+If((Get-ItemPropertyValue -path $registryPath -Name $Name) -ne $value) {
+    Set-ItemProperty -Path $registryPath -Name $Name -Value $value
+}
+
+#Provisioned App Removal List and afterwards loop through the remaining...
 $DefaultRemove = @(
-    "AD2F1837.HPPrivacySettings"
-    "AD2F1837.HPProgrammableKey"
-    "AD2F1837.HPQuickDrop"
-    "AD2F1837.HPSureShieldAI"
-    "AD2F1837.myHP"
-    "AppUp.IntelGraphicsExperience"
-    "AppUp.IntelManagementandSecurityStatus"
-    "AppUp.ThunderboltControlCenter"
     "Microsoft.549981C3F5F10"
     "Microsoft.BingWeather"
     "Microsoft.GetHelp"
@@ -40,14 +49,14 @@ $DefaultRemove = @(
     "Microsoft.YourPhone"
     "Microsoft.ZuneMusic"
     "Microsoft.ZuneVideo"
-    "NVIDIACorp.NVIDIAControlPanel"
 )
 
 ForEach ($toremove in $DefaultRemove) {
-    Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove.DisplayName | Remove-ProvisionedAppxPackage -Online -AllUsers
+    # Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove | Remove-ProvisionedAppxPackage -Online -AllUsers
+    Write-Host "REMOVED" $toremove
 }
 
-$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
+$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
 Switch ($continue) {
     'Yes' {}
     'No' {
@@ -73,3 +82,4 @@ ForEach ($files in $ProvisionedFiles) {
           }
     }
 }
+
