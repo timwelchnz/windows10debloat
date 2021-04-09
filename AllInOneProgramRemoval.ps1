@@ -52,7 +52,7 @@ $DefaultRemove = @(
 )
 
 ForEach ($toremove in $DefaultRemove) {
-    # Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove | Remove-ProvisionedAppxPackage -Online -AllUsers
+    Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove | Remove-ProvisionedAppxPackage -Online -AllUsers
     Write-Host "REMOVED" $toremove
 }
 
