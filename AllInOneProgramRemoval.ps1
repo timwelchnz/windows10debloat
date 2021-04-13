@@ -19,6 +19,20 @@ If((Get-ItemPropertyValue -path $registryPath -Name $Name) -ne $value) {
     Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 
+#Remove Task View Button
+$registryPath = HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+$Name = "ShowTaskViewButton"
+$value = "0"
+
+If((Get-ItemPropertyValue -path $registryPath -Name $Name) -ne $value) {
+  Set-ItemProperty -Path $registryPath -Name $Name -Value $value
+}
+
+#Remove Cortana Button
+$registryPath = HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+$Name = "ShowCortanaButton"
+$value = "0"
+
 #Provisioned App Removal List and afterwards loop through the remaining...
 $DefaultRemove = @(
     "Microsoft.549981C3F5F10"
