@@ -27,7 +27,10 @@ $registryPath = HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advance
 $Name = "ShowTaskViewButton"
 $value = "0"
 
-If((Get-ItemPropertyValue -path $registryPath -Name $Name) -ne $value) {
+$TaskBar = Get-Item -Path $registryPath
+If($TaskBar.GetValue($Name) -eq $null) {
+  New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
+} else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 
