@@ -6,6 +6,12 @@ Add-Type -AssemblyName System.Windows.Forms
 
 Clear-Host
 
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
+$NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name")
+
+[System.Windows.Forms.MessageBox]::Show("Please Enter ?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
+Rename-Computer -NewName $NewComputerName
+
 #Unpin Microsoft Store from Taskbar - https://docs.microsoft.com/en-us/answers/questions/214599/unpin-icons-from-taskbar-in-windows-10-20h2.html
 $appname = "Microsoft Store"
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name -eq $appname}).Verbs() | ?{$_.Name.replace('&','') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
@@ -23,7 +29,7 @@ If($SearchBar.GetValue($Name) -eq $null) {
 }
 
 #Remove Task View Button
-$registryPath = HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 $Name = "ShowTaskViewButton"
 $value = "0"
 
@@ -39,6 +45,13 @@ $registryPath = HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advance
 $Name = "ShowCortanaButton"
 $value = "0"
 
+$Cortana = Get-Item -Path $registryPath
+If($Cortana.GetValue($Name) -eq $null) {
+  New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
+} else {
+  Set-ItemProperty -Path $registryPath -Name $Name -Value $value
+}
+
 #Provisioned App Removal List and afterwards loop through the remaining...
 $DefaultRemove = @(
     "Microsoft.549981C3F5F10"
@@ -52,6 +65,7 @@ $DefaultRemove = @(
     "Microsoft.MixedReality.Portal"
     "Microsoft.Office.OneNote"
     "Microsoft.People"
+    "Microsoft.MSPaint"
     "Microsoft.SkypeApp"
     "Microsoft.Wallet"
     "Microsoft.Whiteboard"
@@ -75,6 +89,22 @@ ForEach ($toremove in $DefaultRemove) {
     Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove | Remove-ProvisionedAppxPackage -Online -AllUsers
     Write-Host "REMOVED" $toremove
 }
+
+#Remove Paint 3D edit from Explorer Context
+$AppExtensions = @(
+    ".bmp"
+    ".gif"
+    ".jpeg"
+    ".jpg"
+    ".jpe"
+    ".png"
+    ".tiff"
+    ".tif"
+)
+ForEach ($AppExtension in $AppExtensions) {
+  Remove-Item -Path "HKLM:\SOFTWARE\Classes\SystemFileAssociations\$AppExtension\Shell\3D Edit" -Recurse
+}
+
 
 $continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
 Switch ($continue) {
@@ -103,3 +133,13 @@ ForEach ($files in $ProvisionedFiles) {
     }
 }
 
+# Automatically connect to your provisioning network
+# as per https://docs.microsoft.com/en-us/mem/intune/configuration/wi-fi-settings-import-windows-8-1
+Netsh WLAN add profile filename=".\Wi-Fi-Wcomp Dirty.xml"
+Netsh WLAN connect name="Wcomp Dirty"
+
+#Run Windows Updates
+Install-Module PSWindowsUpdate -Confirm:$false -Force
+Get-WindowsUpdate -Confirm:$false
+Install-WindowsUpdate -Confirm:$false
+Restart-Computer
