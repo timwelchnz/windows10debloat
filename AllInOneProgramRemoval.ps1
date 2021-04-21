@@ -135,7 +135,16 @@ If(Test-Path -Path '.\Wi-Fi-Wcomp Dirty.xml' -PathType Leaf) {
 Netsh WLAN add profile filename=".\Wi-Fi-Wcomp Dirty.xml"
 Netsh WLAN connect name="Wcomp Dirty"
 } Else {
-  $Wlan = [System.Windows.Forms.MessageBox]::Show($msg,"Connect to Wireless LAN now", "OK" , "Information" , "Button1")
+  $msg = "Connect to WLAN to continue processing"
+  $Wlan = [System.Windows.Forms.MessageBox]::Show($msg,"Connect to Wireless LAN now", "OKCancel" , "Information" , "Button1")
+  Switch($Wlan) {
+    'Cancel' {
+      Exit
+    }
+    'OK' {
+      Write-Host "Continueing... "
+    }
+  }
 }
 
 Set-ExecutionPolicy Bypass -Scope Process -Force
