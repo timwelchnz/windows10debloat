@@ -137,11 +137,13 @@ ForEach ($files in $ProvisionedFiles) {
 Set-ExecutionPolicy Bypass -Scope Process -Force
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-choco install googlechrome adobereader
+choco install googlechrome --ignore-checksum -y
+choco install adobereader -y
 
 
 #Run Windows Updates
+Install-PackageProvider -Name NuGet -Force
 Install-Module PSWindowsUpdate -Confirm:$false -Force
 Get-WindowsUpdate -Confirm:$false
 Install-WindowsUpdate -Confirm:$false
-Restart-Computer
+
