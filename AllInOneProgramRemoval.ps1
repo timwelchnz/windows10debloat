@@ -10,10 +10,12 @@ Clear-Host
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
 $NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name?","Computer Rename")
 Rename-Computer -NewName $NewComputerName
+Write-Host "Renamed computer $NewComputerName"
 
 #Unpin Microsoft Store from Taskbar - https://docs.microsoft.com/en-us/answers/questions/214599/unpin-icons-from-taskbar-in-windows-10-20h2.html
 $appname = "Microsoft Store"
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name -eq $appname}).Verbs() | ?{$_.Name.replace('&','') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
+Write-Host "Unpinned Store from Taskbar"
 
 #Set Search Bar to Icon
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
@@ -25,6 +27,7 @@ If($SearchBar.GetValue($Name) -eq $null) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
+Write-Host "Set Search Bar to icon"
 
 #Remove Task View Button
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
@@ -36,6 +39,7 @@ If($TaskBar.GetValue($Name) -eq $null) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
+Write-Host "Remove Task View Button"
 
 #Remove Cortana Button
 $registryPath = HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
@@ -47,6 +51,7 @@ If($Cortana.GetValue($Name) -eq $null) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
+Write-Host "Remove Cortana Button"
 
 #Provisioned App Removal List and afterwards loop through the remaining...
 $DefaultRemove = @(
@@ -100,7 +105,7 @@ $AppExtensions = @(
 ForEach ($AppExtension in $AppExtensions) {
   Remove-Item -Path "HKLM:\SOFTWARE\Classes\SystemFileAssociations\$AppExtension\Shell\3D Edit" -Recurse
 }
-
+Write-Host "Removed Paint3D from Explorer Context"
 
 $continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
 Switch ($continue) {
@@ -127,24 +132,6 @@ ForEach ($files in $ProvisionedFiles) {
         Write-Host "Kept" $files.DisplayName
           }
     }
-}
-
-# Automatically connect to your provisioning network
-# as per https://docs.microsoft.com/en-us/mem/intune/configuration/wi-fi-settings-import-windows-8-1
-If(Test-Path -Path '.\Wi-Fi-Wcomp Dirty.xml' -PathType Leaf) {
-Netsh WLAN add profile filename=".\Wi-Fi-Wcomp Dirty.xml"
-Netsh WLAN connect name="Wcomp Dirty"
-} Else {
-  $msg = "Connect to WLAN to continue processing"
-  $Wlan = [System.Windows.Forms.MessageBox]::Show($msg,"Connect to Wireless LAN now", "OKCancel" , "Information" , "Button1")
-  Switch($Wlan) {
-    'Cancel' {
-      Exit
-    }
-    'OK' {
-      Write-Host "Continueing... "
-    }
-  }
 }
 
 Set-ExecutionPolicy Bypass -Scope Process -Force
