@@ -6,10 +6,9 @@ Add-Type -AssemblyName System.Windows.Forms
 
 Clear-Host
 
+#Rename Computer
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
-$NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name")
-
-[System.Windows.Forms.MessageBox]::Show("Please Enter ?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
+$NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name?","Computer Rename")
 Rename-Computer -NewName $NewComputerName
 
 #Unpin Microsoft Store from Taskbar - https://docs.microsoft.com/en-us/answers/questions/214599/unpin-icons-from-taskbar-in-windows-10-20h2.html
@@ -20,7 +19,6 @@ $appname = "Microsoft Store"
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
 $Name = "SearchboxTaskbarMode"
 $value = "1"
-
 $SearchBar = Get-Item -Path $registryPath
 If($SearchBar.GetValue($Name) -eq $null) {
   New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
@@ -32,7 +30,6 @@ If($SearchBar.GetValue($Name) -eq $null) {
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 $Name = "ShowTaskViewButton"
 $value = "0"
-
 $TaskBar = Get-Item -Path $registryPath
 If($TaskBar.GetValue($Name) -eq $null) {
   New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
@@ -44,7 +41,6 @@ If($TaskBar.GetValue($Name) -eq $null) {
 $registryPath = HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
 $Name = "ShowCortanaButton"
 $value = "0"
-
 $Cortana = Get-Item -Path $registryPath
 If($Cortana.GetValue($Name) -eq $null) {
   New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
@@ -135,8 +131,18 @@ ForEach ($files in $ProvisionedFiles) {
 
 # Automatically connect to your provisioning network
 # as per https://docs.microsoft.com/en-us/mem/intune/configuration/wi-fi-settings-import-windows-8-1
+If(Test-Path -Path '.\Wi-Fi-Wcomp Dirty.xml' -PathType Leaf) {
 Netsh WLAN add profile filename=".\Wi-Fi-Wcomp Dirty.xml"
 Netsh WLAN connect name="Wcomp Dirty"
+} Else {
+  $Wlan = [System.Windows.Forms.MessageBox]::Show($msg,"Connect to Wireless LAN now", "OK" , "Information" , "Button1")
+}
+
+Set-ExecutionPolicy Bypass -Scope Process -Force
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+choco install googlechrome adobereader
+
 
 #Run Windows Updates
 Install-Module PSWindowsUpdate -Confirm:$false -Force
