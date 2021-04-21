@@ -16,6 +16,8 @@ Write-Host "Renamed computer $NewComputerName"
 $appname = "Microsoft Store"
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name -eq $appname}).Verbs() | ?{$_.Name.replace('&','') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
 Write-Host "Unpinned Store from Taskbar"
+Write-Host -NoNewLine 'Press any key to continue...';
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 
 #Set Search Bar to Icon
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
@@ -28,6 +30,8 @@ If($SearchBar.GetValue($Name) -eq $null) {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 Write-Host "Set Search Bar to icon"
+Write-Host -NoNewLine 'Press any key to continue...';
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 
 #Remove Task View Button
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
@@ -40,6 +44,8 @@ If($TaskBar.GetValue($Name) -eq $null) {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 Write-Host "Remove Task View Button"
+Write-Host -NoNewLine 'Press any key to continue...';
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 
 #Remove Cortana Button
 $registryPath = HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
@@ -52,6 +58,8 @@ If($Cortana.GetValue($Name) -eq $null) {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 Write-Host "Remove Cortana Button"
+Write-Host -NoNewLine 'Press any key to continue...';
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 
 #Provisioned App Removal List and afterwards loop through the remaining...
 $DefaultRemove = @(
