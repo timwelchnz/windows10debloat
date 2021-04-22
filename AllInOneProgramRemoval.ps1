@@ -6,6 +6,13 @@ Add-Type -AssemblyName System.Windows.Forms
 
 Clear-Host
 
+#Set Language to NZ 
+Set-Culture en-NZ
+Set-WinSystemLocale -SystemLocale en-NZ
+Set-TimeZone -Name 'New Zealand Standard Time'
+Set-WinHomeLocation -GeoId 0xb7
+Set-WinUserLanguageList en-NZ -Force -Confirm:$false
+
 #Rename Computer
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
 $NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name?","Computer Rename")
@@ -16,8 +23,6 @@ Write-Host "Renamed computer $NewComputerName"
 $appname = "Microsoft Store"
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name -eq $appname}).Verbs() | ?{$_.Name.replace('&','') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
 Write-Host "Unpinned Store from Taskbar"
-Write-Host -NoNewLine 'Press any key to continue...';
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 
 #Set Search Bar to Icon
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
@@ -30,8 +35,6 @@ If($null -eq $SearchBar.GetValue($Name)) {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 Write-Host "Set Search Bar to icon"
-Write-Host -NoNewLine 'Press any key to continue...';
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 
 #Remove Task View Button
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
@@ -44,8 +47,6 @@ If($null -eq $TaskBar.GetValue($Name)) {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 Write-Host "Remove Task View Button"
-Write-Host -NoNewLine 'Press any key to continue...';
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 
 #Remove Cortana Button
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
@@ -59,7 +60,7 @@ If($null -eq $Cortana.GetValue($Name)) {
 }
 Write-Host "Removed Cortana Button"
 
-#Show My Computer on the Desktop - this works great!
+#Show My Computer on the Desktop
 $Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 $Name = "{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
 $Exist = "Get-ItemProperty -Path $Path -Name $Name"
