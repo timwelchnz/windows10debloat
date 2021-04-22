@@ -1,5 +1,6 @@
 ﻿# TO RUN THIS SCRIPT FIRST CUT&PASTE & RUN THE BELOW LINE OUTSIDE OF THIS SCRIPT
 # Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
+# Or run as a bat file with powershell.exe -executionpolicy bypass -file "AllInOneProgramRemoval.ps1"
 
 #Add Windows Forms Assembly as it seems to be missing on a lot of machines
 Add-Type -AssemblyName System.Windows.Forms
