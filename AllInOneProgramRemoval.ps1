@@ -159,8 +159,8 @@ ForEach ($files in $ProvisionedFiles) {
     }
 }
 
-$StartMenu = @(
-  '<LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
+$StartMenu = @"
+<LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
   <LayoutOptions StartTileGroupCellWidth="6" />
   <DefaultLayoutOverride>
     <StartLayoutCollection>
@@ -172,9 +172,12 @@ $StartMenu = @(
       </defaultlayout:StartLayout>
     </StartLayoutCollection>
   </DefaultLayoutOverride>
-</LayoutModificationTemplate>'
-)
+</LayoutModificationTemplate>
+"@
 
+add-content $Env:TEMP\startlayout.xml $StartLayoutStr
+import-startlayout -layoutpath $Env:TEMP\startlayout.xml -mountpath $Env:SYSTEMDRIVE\
+remove-item $Env:TEMP\startlayout.xml
 
 #Installation of Chocolatey and Apps
 Set-ExecutionPolicy Bypass -Scope Process -Force
