@@ -24,7 +24,7 @@ $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
 $Name = "SearchboxTaskbarMode"
 $value = "1"
 $SearchBar = Get-Item -Path $registryPath
-If($SearchBar.GetValue($Name) -eq $null) {
+If($null -eq $SearchBar.GetValue($Name)) {
   New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
@@ -38,7 +38,7 @@ $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanc
 $Name = "ShowTaskViewButton"
 $value = "0"
 $TaskBar = Get-Item -Path $registryPath
-If($TaskBar.GetValue($Name) -eq $null) {
+If($null -eq $TaskBar.GetValue($Name)) {
   New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
@@ -48,11 +48,11 @@ Write-Host -NoNewLine 'Press any key to continue...';
 $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 
 #Remove Cortana Button
-$registryPath = HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 $Name = "ShowCortanaButton"
 $value = "0"
 $Cortana = Get-Item -Path $registryPath
-If($Cortana.GetValue($Name) -eq $null) {
+If($null -eq $Cortana.GetValue($Name)) {
   New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
@@ -142,6 +142,18 @@ ForEach ($files in $ProvisionedFiles) {
     }
 }
 
+$Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
+$Name = "{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
+$Exist = "Get-ItemProperty -Path $Path -Name $Name"
+if ($Exist)
+{
+    Set-ItemProperty -Path $Path -Name $Name -Value 0
+}
+Else
+{
+    New-ItemProperty -Path $Path -Name $Name -Value 0
+}
+
 Set-ExecutionPolicy Bypass -Scope Process -Force
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
@@ -152,6 +164,6 @@ choco install adobereader -y
 #Run Windows Updates
 Install-PackageProvider -Name NuGet -Force
 Install-Module PSWindowsUpdate -Confirm:$false -Force
-Get-WindowsUpdate -Confirm:$false
-Install-WindowsUpdate -Confirm:$false
+Get-WindowsUpdate -install -acceptall -autoreboot -Confirm:$false
+
 
