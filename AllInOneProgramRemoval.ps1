@@ -2,6 +2,15 @@
 # Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
 # Or run as a bat file with powershell.exe -executionpolicy bypass -file "AllInOneProgramRemoval.ps1"
 
+#Logging for debugging
+Function Log {
+  param(
+      [Parameter(Mandatory=$true)][String]$msg
+  )
+  Add-Content -Path $env:TEMP\log.txt $msg
+}
+
+
 #Add Windows Forms Assembly as it seems to be missing on a lot of machines
 Add-Type -AssemblyName System.Windows.Forms
 
@@ -15,16 +24,26 @@ Set-WinHomeLocation -GeoId 0xb7
 Set-WinUserLanguageList en-NZ -Force -Confirm:$false
 
 #Rename Computer
+Log "Renaming Computer"
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
 $NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name?","Computer Rename")
-Rename-Computer -NewName $NewComputerName
-Write-Host "Renamed computer $NewComputerName"
+If ($NewComputerName -eq $null){
+  $ServiceTAG = Get-WmiObject Win32_BIOS | Select-Object -ExpandProperty serialnumber
+  $ServiceTAG = (Get-WmiObject Win32_BIOS).serialnumber
+  Rename-Computer -NewName $ServiceTAG
+  Write-Host "Renamed computer $ServiceTAG"
+} Else {
+  Rename-Computer -NewName $NewComputerName
+  Write-Host "Renamed computer $NewComputerName"
+}
 
+
+Log "Unpin Microsoft Store"
 #Unpin Microsoft Store from Taskbar - https://docs.microsoft.com/en-us/answers/questions/214599/unpin-icons-from-taskbar-in-windows-10-20h2.html
 $appname = "Microsoft Store"
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name -eq $appname}).Verbs() | ?{$_.Name.replace('&','') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
-Write-Host "Unpinned Store from Taskbar"
 
+Log "Set Search Bar to Icon"
 #Set Search Bar to Icon
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
 $Name = "SearchboxTaskbarMode"
@@ -35,8 +54,8 @@ If($null -eq $SearchBar.GetValue($Name)) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
-Write-Host "Set Search Bar to icon"
 
+Log "Remove Task View Button"
 #Remove Task View Button
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 $Name = "ShowTaskViewButton"
@@ -49,6 +68,7 @@ If($null -eq $TaskBar.GetValue($Name)) {
 }
 Write-Host "Remove Task View Button"
 
+Log "Remove Cortana Button"
 #Remove Cortana Button
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 $Name = "ShowCortanaButton"
@@ -59,8 +79,9 @@ If($null -eq $Cortana.GetValue($Name)) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
-Write-Host "Removed Cortana Button"
 
+
+Log "Show My Computer on the Desktop"
 #Show My Computer on the Desktop
 $Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 $Name = "{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
@@ -74,10 +95,12 @@ Else
     New-ItemProperty -Path $Path -Name $Name -Value 0
 }
 
+Log "Disable Turn-on Automatic Setup of Network Connected Devices"
 # DISABLE 'TURN ON AUTOMATIC SETUP OF NETWORK CONNECTED DEVICES' (Automatically adds printers)
 New-Item -Path "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup" -Name "Private"
 New-ItemProperty "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup\Private" -Name "AutoSetup" -Value 0 -PropertyType "DWord"
 
+Log "Started Provisioned App Removal"
 #Provisioned App Removal List and afterwards loop through the remaining...
 $DefaultRemove = @(
     "Microsoft.549981C3F5F10"
@@ -113,8 +136,9 @@ $DefaultRemove = @(
 
 ForEach ($toremove in $DefaultRemove) {
     Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove | Remove-ProvisionedAppxPackage -Online -AllUsers
-    Write-Host "REMOVED" $toremove
+    Log "REMOVED" $toremove
 }
+Log "Completed automatic removal of provisioned apps"
 
 #Remove Paint 3D edit from Explorer Context
 $AppExtensions = @(
@@ -130,8 +154,9 @@ $AppExtensions = @(
 ForEach ($AppExtension in $AppExtensions) {
   Remove-Item -Path "HKLM:\SOFTWARE\Classes\SystemFileAssociations\$AppExtension\Shell\3D Edit" -Recurse
 }
-Write-Host "Removed Paint3D from Explorer Context"
+Log "Removed Paint3D from Explorer Context"
 
+Log "About to ask to continue to step through the rest of the provisoned apps"
 $continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
 Switch ($continue) {
     'Yes' {}
@@ -140,7 +165,6 @@ Switch ($continue) {
     }
 
 }
-
 
 # Now retrieve remaining Provisioned Packages...
 $ProvisionedFiles = @(Get-ProvisionedAppxPackage -Online | Select-Object DisplayName)
@@ -151,13 +175,14 @@ ForEach ($files in $ProvisionedFiles) {
     switch  ($remove) {
       'Yes' {
         Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $files.DisplayName | Remove-ProvisionedAppxPackage -Online -AllUsers
-        Write-Host "REMOVED" $files.DisplayName
+        Log "REMOVED" $files.DisplayName
           }
       'No' {
-        Write-Host "Kept" $files.DisplayName
+        Log "Kept" $files.DisplayName
           }
     }
 }
+Log "Completed stepping through the rest of the provisoned apps"
 
 $StartLayoutStr = @"
 <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
@@ -178,14 +203,16 @@ $StartLayoutStr = @"
 add-content $Env:TEMP\startlayout.xml $StartLayoutStr
 import-startlayout -layoutpath $Env:TEMP\startlayout.xml -mountpath $Env:SYSTEMDRIVE\
 remove-item $Env:TEMP\startlayout.xml
+Log "Completed importing new Start Menu"
 
+Log "Beginning Installation of Chocolatey and apps"
 #Installation of Chocolatey and Apps
 Set-ExecutionPolicy Bypass -Scope Process -Force
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 choco install googlechrome --ignore-checksum -y
 choco install adobereader -y
-
+Log "Completed installation of chocolatey and apps"
 
 #Run Windows Updates
 Install-PackageProvider -Name NuGet -Force
