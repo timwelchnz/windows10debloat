@@ -27,15 +27,13 @@ Set-WinUserLanguageList en-NZ -Force -Confirm:$false
 Log "Renaming Computer"
 #[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
 #$NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name?","Computer Rename")
-$NewComputerName = Read-Host "Enter new comouter name, or just hit [Enter] to rename to serial number:"
+Write-Host "Current computer name is: $env:COMPUTERNAME"
+$NewComputerName = Read-Host "Enter new computer name, or just hit [Enter] to rename to serial number"
 If ("" -eq $NewComputerName){
-  $ServiceTAG = Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -ExpandProperty SerialNumber
-  Rename-Computer -NewName $ServiceTAG
-  Write-Host "Renamed computer $ServiceTAG"
-} Else {
-  Rename-Computer -NewName $NewComputerName
-  Write-Host "Renamed computer $NewComputerName"
-}
+  $NewComputerName = Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -ExpandProperty SerialNumber
+} 
+Rename-Computer -NewName $NewComputerName
+Log "Renamed computer: $NewComputerName"
 
 
 Log "Unpin Microsoft Store"
