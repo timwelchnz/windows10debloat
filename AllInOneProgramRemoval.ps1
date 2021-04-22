@@ -57,9 +57,24 @@ If($null -eq $Cortana.GetValue($Name)) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
-Write-Host "Remove Cortana Button"
-Write-Host -NoNewLine 'Press any key to continue...';
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+Write-Host "Removed Cortana Button"
+
+#Show My Computer on the Desktop - this works great!
+$Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
+$Name = "{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
+$Exist = "Get-ItemProperty -Path $Path -Name $Name"
+if ($Exist)
+{
+    Set-ItemProperty -Path $Path -Name $Name -Value 0
+}
+Else
+{
+    New-ItemProperty -Path $Path -Name $Name -Value 0
+}
+
+# DISABLE 'TURN ON AUTOMATIC SETUP OF NETWORK CONNECTED DEVICES' (Automatically adds printers)
+New-Item -Path "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup" -Name "Private"
+New-ItemProperty "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup\Private" -Name "AutoSetup" -Value 0 -PropertyType "DWord"
 
 #Provisioned App Removal List and afterwards loop through the remaining...
 $DefaultRemove = @(
@@ -142,21 +157,11 @@ ForEach ($files in $ProvisionedFiles) {
     }
 }
 
-$Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
-$Name = "{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
-$Exist = "Get-ItemProperty -Path $Path -Name $Name"
-if ($Exist)
-{
-    Set-ItemProperty -Path $Path -Name $Name -Value 0
-}
-Else
-{
-    New-ItemProperty -Path $Path -Name $Name -Value 0
-}
+
 
 Set-ExecutionPolicy Bypass -Scope Process -Force
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 choco install googlechrome --ignore-checksum -y
 choco install adobereader -y
 
