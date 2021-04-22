@@ -27,7 +27,7 @@ Set-WinUserLanguageList en-NZ -Force -Confirm:$false
 Log "Renaming Computer"
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
 $NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name?","Computer Rename")
-If ($NewComputerName -eq $null){
+If ("" -eq $NewComputerName){
   $ServiceTAG = Get-WmiObject Win32_BIOS | Select-Object -ExpandProperty serialnumber
   $ServiceTAG = (Get-WmiObject Win32_BIOS).serialnumber
   Rename-Computer -NewName $ServiceTAG
@@ -210,6 +210,7 @@ Log "Beginning Installation of Chocolatey and apps"
 Set-ExecutionPolicy Bypass -Scope Process -Force
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+choco feature enable -n allowGlobalConfirmation
 choco install googlechrome --ignore-checksum -y
 choco install adobereader -y
 Log "Completed installation of chocolatey and apps"
