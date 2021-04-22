@@ -25,11 +25,11 @@ Set-WinUserLanguageList en-NZ -Force -Confirm:$false
 
 #Rename Computer
 Log "Renaming Computer"
-[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
-$NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name?","Computer Rename")
+#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
+#$NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name?","Computer Rename")
+$NewComputerName = Read-Host "Enter new comouter name, or just hit [Enter] to rename to serial number:"
 If ("" -eq $NewComputerName){
-  $ServiceTAG = Get-WmiObject Win32_BIOS | Select-Object -ExpandProperty serialnumber
-  $ServiceTAG = (Get-WmiObject Win32_BIOS).serialnumber
+  $ServiceTAG = Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -ExpandProperty SerialNumber
   Rename-Computer -NewName $ServiceTAG
   Write-Host "Renamed computer $ServiceTAG"
 } Else {
@@ -157,10 +157,12 @@ ForEach ($AppExtension in $AppExtensions) {
 Log "Removed Paint3D from Explorer Context"
 
 Log "About to ask to continue to step through the rest of the provisoned apps"
-$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
+#$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
+Write-Host "Do you want to continue through remaining AppX Packages? [y]es or [n]o"
+#$continue = $Host.UI.RawUI.ReadKey()
 Switch ($continue) {
-    'Yes' {}
-    'No' {
+    'y' {}
+    'n' {
       Exit
     }
 
