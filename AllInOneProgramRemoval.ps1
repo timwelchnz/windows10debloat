@@ -133,8 +133,8 @@ $DefaultRemove = @(
 )
 
 ForEach ($toremove in $DefaultRemove) {
-    Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove | Remove-ProvisionedAppxPackage -Online -AllUsers
-    Log "REMOVED" $toremove
+    Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove | Remove-ProvisionedAppxPackage -Online -AllUsers | Out-Null
+    Log "REMOVED: $toremove"
 }
 Log "Completed automatic removal of provisioned apps"
 
@@ -157,7 +157,7 @@ Log "Removed Paint3D from Explorer Context"
 Log "About to ask to continue to step through the rest of the provisoned apps"
 #$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
 Write-Host "Do you want to continue through remaining AppX Packages? [y]es or [n]o"
-#$continue = $Host.UI.RawUI.ReadKey()
+$continue = $Host.UI.RawUI.ReadKey()
 Switch ($continue) {
     'y' {}
     'n' {
@@ -174,11 +174,11 @@ ForEach ($files in $ProvisionedFiles) {
     $remove = [System.Windows.Forms.MessageBox]::Show($msg,"Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
     switch  ($remove) {
       'Yes' {
-        Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $files.DisplayName | Remove-ProvisionedAppxPackage -Online -AllUsers
-        Log "REMOVED" $files.DisplayName
+        Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $files.DisplayName | Remove-ProvisionedAppxPackage -Online -AllUsers | Out-Null
+        Log "REMOVED: $files.DisplayName"
           }
       'No' {
-        Log "Kept" $files.DisplayName
+        Log "Kept: $files.DisplayName"
           }
     }
 }
@@ -216,8 +216,8 @@ choco install adobereader -y
 Log "Completed installation of chocolatey and apps"
 
 #Run Windows Updates
-Install-PackageProvider -Name NuGet -Force
-Install-Module PSWindowsUpdate -Confirm:$false -Force
-Get-WindowsUpdate -install -acceptall -autoreboot -Confirm:$false
+Install-PackageProvider -Name NuGet -Force | Out-Null
+Install-Module PSWindowsUpdate -Confirm:$false -Force | Out-Null
+Get-WindowsUpdate -install -acceptall -autoreboot -Confirm:$false | Out-Null
 
 
