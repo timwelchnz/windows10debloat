@@ -1,6 +1,7 @@
 # The below needs to be exported from a current Working WiFi Profile
 # On a working machine run "netsh wlan show profiles" to get the specific name of the profile you want to export
 # Then run "netsh wlan export profile "contosowifi" key=clear folder=c:\temp" to produce an XML file you are going to copy into the below.
+# 	<connectionMode>auto</connectionMode> Needs to be auto for WiFi to connect automatically.
 
 $wlanProfile = @'
 <?xml version="1.0"?>
@@ -13,7 +14,7 @@ $wlanProfile = @'
 		</SSID>
 	</SSIDConfig>
 	<connectionType>ESS</connectionType>
-	<connectionMode>auto</connectionMode>
+	<connectionMode>auto</connectionMode> 
 	<MSM>
 		<security>
 			<authEncryption>
