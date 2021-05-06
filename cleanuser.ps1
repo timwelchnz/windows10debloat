@@ -38,12 +38,9 @@ Log "Remove Meet Now from Taskbar"
 $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
 $Name = "HideSCAMeetNow"
 $value = "1"
-$Exist = "Get-ItemProperty -Path $registryPath -Name $Name"
-if ($Exist)
-{
-    Set-ItemProperty -Path $Path -Name $Name -Value $value
-}
-Else
-{
-    New-ItemProperty -Path $Path -Name $Name -Value $value -PropertyType DWord
+$Exist = Get-ItemProperty -Path $registryPath -Name $Name
+if ($Exist) {
+    Set-ItemProperty -Path $registryPath -Name $Name -Value $value
+} Else {
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
 }

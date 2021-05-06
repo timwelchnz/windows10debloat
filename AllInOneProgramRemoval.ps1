@@ -10,7 +10,6 @@ Function Log {
   Add-Content -Path $env:TEMP\log.txt $msg
 }
 
-
 #Add Windows Forms Assembly as it seems to be missing on a lot of machines
 Add-Type -AssemblyName System.Windows.Forms
 
@@ -64,7 +63,7 @@ If($null -eq $TaskBar.GetValue($Name)) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
-Write-Host "Remove Task View Button"
+Log "Removed Task View Button"
 
 Log "Remove Cortana Button"
 #Remove Cortana Button
@@ -91,6 +90,17 @@ if ($Exist)
 Else
 {
     New-ItemProperty -Path $Path -Name $Name -Value 0
+}
+
+Log "Remove Meet Now from Taskbar"
+$registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$Name = "HideSCAMeetNow"
+$value = "1"
+$Exist = Get-ItemProperty -Path $registryPath -Name $Name
+if ($Exist) {
+    Set-ItemProperty -Path $registryPath -Name $Name -Value $value
+} Else {
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
 }
 
 Log "Disable Turn-on Automatic Setup of Network Connected Devices"
