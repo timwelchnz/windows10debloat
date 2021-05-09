@@ -165,34 +165,36 @@ ForEach ($AppExtension in $AppExtensions) {
 Log "Removed Paint3D from Explorer Context"
 
 Log "About to ask to continue to step through the rest of the provisoned apps"
-#$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
-Write-Host "Do you want to continue through remaining AppX Packages? [y]es or [n]o"
-$continue = $Host.UI.RawUI.ReadKey()
+$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
+# Write-Host "Do you want to continue through remaining AppX Packages? [y]es or [n]o"
+# $continue = $Host.UI.RawUI.ReadKey()
 Switch ($continue) {
-    'y' {}
-    'n' {
-      Exit
+    'Yes' {
+        # Now retrieve remaining Provisioned Packages...
+        $ProvisionedFiles = @(Get-ProvisionedAppxPackage -Online | Select-Object DisplayName)
+
+        ForEach ($files in $ProvisionedFiles) {
+            $msg   = "Remove " + $files.DisplayName + "?"
+            $remove = [System.Windows.Forms.MessageBox]::Show($msg,"Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
+            switch  ($remove) {
+              'Yes' {
+                Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $files.DisplayName | Remove-ProvisionedAppxPackage -Online -AllUsers | Out-Null
+                Log "REMOVED: $files.DisplayName"
+                Write-Host "REMOVED: $files.DisplayName"
+                  }
+              'No' {
+                Log "Kept: $files.DisplayName"
+                Write-Host "Kept: $files.DisplayName"
+                  }
+            }
+        }
+        Log "Completed stepping through the rest of the provisoned apps"
+    }
+    'No' {
     }
 
 }
 
-# Now retrieve remaining Provisioned Packages...
-$ProvisionedFiles = @(Get-ProvisionedAppxPackage -Online | Select-Object DisplayName)
-
-ForEach ($files in $ProvisionedFiles) {
-    $msg   = "Remove " + $files.DisplayName + "?"
-    $remove = [System.Windows.Forms.MessageBox]::Show($msg,"Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
-    switch  ($remove) {
-      'Yes' {
-        Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $files.DisplayName | Remove-ProvisionedAppxPackage -Online -AllUsers | Out-Null
-        Log "REMOVED: $files.DisplayName"
-          }
-      'No' {
-        Log "Kept: $files.DisplayName"
-          }
-    }
-}
-Log "Completed stepping through the rest of the provisoned apps"
 
 $StartLayoutStr = @"
 <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
@@ -210,9 +212,19 @@ $StartLayoutStr = @"
 </LayoutModificationTemplate>
 "@
 
+# This changes the default user start menu and the currently logged in user
 add-content $Env:TEMP\startlayout.xml $StartLayoutStr
 import-startlayout -layoutpath $Env:TEMP\startlayout.xml -mountpath $Env:SYSTEMDRIVE\
-remove-item $Env:TEMP\startlayout.xml
+New-Item -Path HKCU:\SOFTWARE\Policies\Microsoft\Windows -Name Explorer -ErrorAction SilentlyContinue
+Reg Add "HKCU\SOFTWARE\Policies\Microsoft\Windows\Explorer" /V LockedStartLayout /T REG_DWORD /D 1 /F
+Reg Add "HKCU\SOFTWARE\Policies\Microsoft\Windows\Explorer" /V StartLayoutFile /T REG_EXPAND_SZ /D '$Env:TEMP\startlayout.xml' /F
+Stop-Process -ProcessName explorer
+Start-Sleep -s 10
+#sleep is to let explorer finish restart b4 deleting reg keys
+Remove-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "LockedStartLayout" -Force
+Remove-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "StartLayoutFile" -Force
+Stop-Process -ProcessName explorer
+remove-item $Env:TEMP\startlayout.xml -ErrorAction SilentlyContinue -Force
 Log "Completed importing new Start Menu"
 
 Log "Beginning Installation of Chocolatey and apps"
@@ -226,8 +238,8 @@ choco install adobereader -y
 Log "Completed installation of chocolatey and apps"
 
 #Run Windows Updates
-Install-PackageProvider -Name NuGet -Force | Out-Null
-Install-Module PSWindowsUpdate -Confirm:$false -Force | Out-Null
-Get-WindowsUpdate -install -acceptall -autoreboot -Confirm:$false | Out-Null
+Install-PackageProvider -Name NuGet -Force 
+Install-Module PSWindowsUpdate -Confirm:$false -Force
+Get-WindowsUpdate -install -acceptall -autoreboot -Confirm:$false
 
 
