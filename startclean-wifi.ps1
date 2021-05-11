@@ -6,7 +6,7 @@
 $wlanProfile = @'
 <?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
-	<name>4ValleyCrescent</name>
+	<name>*** WLAN Profile Name ***</name>
 	<SSIDConfig>
 		<SSID>
 			<hex></hex>
