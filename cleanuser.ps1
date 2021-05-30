@@ -45,6 +45,62 @@ if ($Exist) {
     New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
 }
 
+#Remove Cortana Button
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+$Name = "ShowCortanaButton"
+$value = "0"
+$Cortana = Get-Item -Path $registryPath
+If($null -eq $Cortana.GetValue($Name)) {
+  New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
+} else {
+  Set-ItemProperty -Path $registryPath -Name $Name -Value $value
+}
+
+Log "Disable Turn-on Automatic Setup of Network Connected Devices"
+# DISABLE 'TURN ON AUTOMATIC SETUP OF NETWORK CONNECTED DEVICES' (Automatically adds printers)
+New-Item -Path "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup" -Name "Private"
+New-ItemProperty "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup\Private" -Name "AutoSetup" -Value 0 -PropertyType "DWord"
+
+Log "Started Provisioned App Removal"
+#Provisioned App Removal List and afterwards loop through the remaining...
+$DefaultRemove = @(
+    "Microsoft.549981C3F5F10"
+    "Microsoft.BingWeather"
+    "Microsoft.GetHelp"
+    "Microsoft.Getstarted"
+    "Microsoft.Microsoft3DViewer"
+    "Microsoft.MicrosoftOfficeHub"
+    "Microsoft.MicrosoftSolitaireCollection"
+    "Microsoft.MicrosoftStickyNotes"
+    "Microsoft.MixedReality.Portal"
+    "Microsoft.Office.OneNote"
+    "Microsoft.People"
+    "Microsoft.MSPaint"
+    "Microsoft.SkypeApp"
+    "Microsoft.Wallet"
+    "Microsoft.Whiteboard"
+    "Microsoft.WindowsAlarms"
+    "microsoft.windowscommunicationsapps"
+    "Microsoft.WindowsFeedbackHub"
+    "Microsoft.WindowsMaps"
+    "Microsoft.WindowsSoundRecorder"
+    "Microsoft.Xbox.TCUI"
+    "Microsoft.XboxApp"
+    "Microsoft.XboxGameOverlay"
+    "Microsoft.XboxGamingOverlay"
+    "Microsoft.XboxIdentityProvider"
+    "Microsoft.XboxSpeechToTextOverlay"
+    "Microsoft.YourPhone"
+    "Microsoft.ZuneMusic"
+    "Microsoft.ZuneVideo"
+)
+
+ForEach ($toremove in $DefaultRemove) {
+    Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove | Remove-ProvisionedAppxPackage -Online -AllUsers | Out-Null
+    Log "REMOVED: $toremove"
+}
+Log "Completed automatic removal of provisioned apps"
+
 $StartLayoutStr = @"
 <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
   <LayoutOptions StartTileGroupCellWidth="6" />
