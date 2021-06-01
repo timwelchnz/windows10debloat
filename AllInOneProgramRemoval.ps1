@@ -233,8 +233,24 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 choco feature enable -n allowGlobalConfirmation
-choco install googlechrome --ignore-checksum -y
-choco install adobereader -y
+
+$chromeInstalled = (Get-Item (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe').'(Default)').VersionInfo
+if ($null -eq $chromeInstalled.FileName) {
+  choco install googlechrome --ignore-checksum -y 
+  Log "Chrome installed"
+}
+else {
+  Log "Chrome already installed"
+}
+
+$AcrobatReaderInstalled = (Get-Item (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\AcroRd32.exe').'(Default)').VersionInfo
+if ($null -eq $AcrobatReaderInstalled.FileName) {
+  choco install adobereader -y
+  Log "Adobe Reader installed"
+}
+else {
+  Log "Adobe Reader already installed"
+}
 Log "Completed installation of chocolatey and apps"
 
 #Run Windows Updates
