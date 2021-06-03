@@ -24,16 +24,20 @@ Set-WinUserLanguageList en-NZ -Force -Confirm:$false
 
 #Rename Computer
 Log "Renaming Computer"
-#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
-#$NewComputerName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter New Computer Name?","Computer Rename")
 Write-Host "Current computer name is: $env:COMPUTERNAME"
-$NewComputerName = Read-Host "Enter new computer name, or just hit [Enter] to rename to serial number"
-If ("" -eq $NewComputerName){
-  $NewComputerName = Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -ExpandProperty SerialNumber
-} 
-Rename-Computer -NewName $NewComputerName
-Log "Renamed computer: $NewComputerName"
-
+$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to rename this computer from $env:COMPUTERNAME ?","Computer Rename", "YesNo" , "Information" , "Button1")
+Switch ($continue) {
+  'Yes' {
+    $NewComputerName = Read-Host "Enter new computer name, or just hit [Enter] to rename to serial number"
+    If ("" -eq $NewComputerName){
+      $NewComputerName = Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -ExpandProperty SerialNumber
+    } 
+    Rename-Computer -NewName $NewComputerName
+    Log "Renamed computer: $NewComputerName"
+  }
+  'No' {
+  }
+}
 
 Log "Unpin Microsoft Store"
 #Unpin Microsoft Store from Taskbar - https://docs.microsoft.com/en-us/answers/questions/214599/unpin-icons-from-taskbar-in-windows-10-20h2.html
