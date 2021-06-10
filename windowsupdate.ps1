@@ -1,4 +1,6 @@
-#Run Windows Updates
+# Run Windows Updates Silently in Background
+# Tim Welch
+# 11/06/2021
 
 $PackageProvider = "NuGet"
 if (Get-PackageProvider -ListAvailable -Name $PackageProvider) {

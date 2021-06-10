@@ -1,4 +1,14 @@
-if ($null -eq  (Get-Item (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\AcroRd31.exe' -ErrorAction SilentlyContinue).'(Default)' -ErrorAction SilentlyContinue).VersionInfo) {
-    Write-Host "Does not exist"
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
 
-}
+$Name = "SearchboxTaskbarMode"
+$value = "1"
+$SearchBar = Get-Item -Path $registryPath
+
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds"
+$Name = "DontEnumerateConnectedUsers"
+$value = "0"
+New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
+
+
+rename-computer -NewName CDL-MAIN-01 -WhatIf
