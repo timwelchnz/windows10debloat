@@ -260,6 +260,6 @@ Log "Completed installation of chocolatey and apps"
 #Run Windows Updates
 Install-PackageProvider -Name NuGet -Force 
 Install-Module PSWindowsUpdate -Confirm:$false -Force
-Get-WindowsUpdate -install -acceptall -autoreboot -Confirm:$false
+Get-WindowsUpdate -install -acceptall -autoreboot -Confirm:$false -Verbose
 
 
