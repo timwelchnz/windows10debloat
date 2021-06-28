@@ -41,15 +41,16 @@ Else
     New-ItemProperty -Path $Path -Name $Name -Value 0
 }
 
-# # Remove News And Interests
-# $registryPath = "HKLM:SOFTWARE\Policies\Microsoft\Windows\Windows Feeds"
-# $Name = "EnableFeeds"
-# $value = "0"
-# new-item 'HKLM:SOFTWARE\Policies\Microsoft\Windows' -Name 'Windows Feeds'
-# $TaskBar = Get-Item -Path $registryPath
-# If($null -eq $TaskBar.GetValue($Name)) {
-#    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
-# } else {
-#    Set-ItemProperty -Path $registryPath -Name $Name -Value $value
-# }
-# Stop-Process -ProcessName explorer
+# Remove News And Interests
+$registryPath = "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds"
+$Name = "ShellFeedsTaskbarViewMode"
+$value = "2"
+new-item 'HKLM:SOFTWARE\Policies\Microsoft\Windows' -Name 'Windows Feeds'
+$TaskBar = Get-Item -Path $registryPath
+If($null -eq $TaskBar.GetValue($Name)) {
+   New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
+} else {
+   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
+}
+
+Stop-Process -ProcessName explorer
