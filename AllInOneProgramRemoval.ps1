@@ -39,6 +39,25 @@ Switch ($continue) {
   }
 }
 
+$path = $Env:windir + '\system32\oobe\info\'
+If (-not(Test-Path -Path $path -PathType Container)) {
+    $null = New-Item -ItemType Directory -Path $path -ErrorAction Continue
+}
+$oobexmlStr = @"
+<FirstExperience>
+  <oobe>
+    <defaults>
+      <language>1033</language>
+      <location>183</location>
+      <keyboard>1409:00000409</keyboard>
+      <timezone>New Zealand Standard Time</timezone>
+      <adjustForDST>true</adjustForDST>
+    </defaults>
+  </oobe>
+</FirstExperience>
+"@
+add-content $path\oobe.xml $oobexmlStr
+
 Log "Unpin Microsoft Store"
 #Unpin Microsoft Store from Taskbar - https://docs.microsoft.com/en-us/answers/questions/214599/unpin-icons-from-taskbar-in-windows-10-20h2.html
 $appname = "Microsoft Store"
@@ -80,7 +99,6 @@ If($null -eq $Cortana.GetValue($Name)) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
-
 
 Log "Show My Computer on the Desktop"
 #Show My Computer on the Desktop
