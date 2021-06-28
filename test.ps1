@@ -1,6 +1,6 @@
-$path = "$Env:windir\System32\Oobe\Info\"
+$path = $Env:windir + '\system32\oobe\info\'
 If (-not(Test-Path -Path $path -PathType Container)) {
-    $null = New-Item -ItemType Directory -Path $path -ErrorAction STOP
+    $null = New-Item -ItemType Directory -Path $path -ErrorAction Continue
 }
 $oobexmlStr = @"
 <FirstExperience>
@@ -17,5 +17,18 @@ $oobexmlStr = @"
 "@
 add-content $path\oobe.xml $oobexmlStr -Verbose
 
-$scriptStr = 'PowerShell.exe -NoProfile -Command "& {Start-Process PowerShell.exe -ArgumentList ''-NoProfile -ExecutionPolicy Bypass -File ""startclean-wifi.ps1""'' -Verb RunAs}"'
-Add-Content -Path "$Env:windir\Setup\Scripts\setupcomplete.cmd" $scriptStr
+
+$ScriptPath = $Env:windir + '\Setup\Scripts\'
+If (-not(Test-Path -Path $ScriptPath -PathType Container)) {
+    $null = New-Item -ItemType Directory -Path $ScriptPath -ErrorAction Continue
+}
+# Source file location
+$source = 'https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/afteroobe.ps1'
+# Destination to save the file
+$destination = $ScriptPath + 'afteroobe.ps1'
+#Download the file
+Invoke-WebRequest -Uri $source -OutFile $destination
+
+$scriptStr = 'PowerShell.exe -NoProfile -Command "& {Start-Process PowerShell.exe -ArgumentList ''-NoProfile -ExecutionPolicy Bypass -File ""afteroobe.ps1""'' -Verb RunAs}"'
+$afteroobe = $ScriptPath + 'setupcomplete.cmd'
+Add-Content -Path $afteroobe $scriptStr
