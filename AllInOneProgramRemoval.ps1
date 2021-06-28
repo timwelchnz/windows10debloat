@@ -58,6 +58,22 @@ $oobexmlStr = @"
 "@
 add-content $path\oobe.xml $oobexmlStr
 
+# Run Script after OOBE to clean up
+$ScriptPath = $Env:windir + '\Setup\Scripts\'
+If (-not(Test-Path -Path $ScriptPath -PathType Container)) {
+    $null = New-Item -ItemType Directory -Path $ScriptPath -ErrorAction Continue
+}
+# Source file location
+$source = 'https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/afteroobe.ps1'
+# Destination to save the file
+$destination = $ScriptPath + 'afteroobe.ps1'
+#Download the file
+Invoke-WebRequest -Uri $source -OutFile $destination
+
+$scriptStr = 'PowerShell.exe -NoProfile -ExecutionPolicy Bypass -File .\afteroobe.ps1'
+$afteroobe = $ScriptPath + 'setupcomplete.cmd'
+Add-Content -Path $afteroobe $scriptStr
+
 Log "Unpin Microsoft Store"
 #Unpin Microsoft Store from Taskbar - https://docs.microsoft.com/en-us/answers/questions/214599/unpin-icons-from-taskbar-in-windows-10-20h2.html
 $appname = "Microsoft Store"
@@ -87,6 +103,22 @@ If($null -eq $TaskBar.GetValue($Name)) {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 Log "Removed Task View Button"
+
+Log "Remove News and Interests"
+# Remove Microsoft News and Interests from Taskbar
+$registryPath = "HKLM:SOFTWARE\Policies\Microsoft\Windows\Windows Feeds"
+$Name = "EnableFeeds"
+$value = "0"
+new-item 'HKLM:SOFTWARE\Policies\Microsoft\Windows' -Name 'Windows Feeds'
+$TaskBar = Get-Item -Path $registryPath
+If($null -eq $TaskBar.GetValue($Name)) {
+   New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
+} else {
+   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
+}
+
+# Prevent Edge from adding shortcuts to desktop
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate" /v "CreateDesktopShortcutDefault" /t REG_DWORD /d 0 /f /reg:64 | Out-Host
 
 Log "Remove Cortana Button"
 #Remove Cortana Button
@@ -274,6 +306,9 @@ else {
   Log "Adobe Reader already installed"
 }
 Log "Completed installation of chocolatey and apps"
+
+# Remove Desktop links
+Remove-Item "C:\Users\*\Desktop\*.lnk" -Force
 
 #Run Windows Updates
 Install-PackageProvider -Name NuGet -Force 
