@@ -1,14 +1,21 @@
-$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
+$path = "$Env:windir\System32\Oobe\Info\"
+If (-not(Test-Path -Path $path -PathType Container)) {
+    $null = New-Item -ItemType Directory -Path $path -ErrorAction STOP
+}
+$oobexmlStr = @"
+<FirstExperience>
+  <oobe>
+    <defaults>
+      <language>1033</language>
+      <location>183</location>
+      <keyboard>1409:00000409</keyboard>
+      <timezone>New Zealand Standard Time</timezone>
+      <adjustForDST>true</adjustForDST>
+    </defaults>
+  </oobe>
+</FirstExperience>
+"@
+add-content $path\oobe.xml $oobexmlStr -Verbose
 
-$Name = "SearchboxTaskbarMode"
-$value = "1"
-$SearchBar = Get-Item -Path $registryPath
-
-
-$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds"
-$Name = "DontEnumerateConnectedUsers"
-$value = "0"
-New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
-
-
-rename-computer -NewName CDL-MAIN-01 -WhatIf
+$scriptStr = 'PowerShell.exe -NoProfile -Command "& {Start-Process PowerShell.exe -ArgumentList ''-NoProfile -ExecutionPolicy Bypass -File ""startclean-wifi.ps1""'' -Verb RunAs}"'
+Add-Content -Path "$Env:windir\Setup\Scripts\setupcomplete.cmd" $scriptStr
