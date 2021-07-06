@@ -17,5 +17,5 @@ if (Get-Module -ListAvailable -Name $Module) {
 else {
     Install-Module PSWindowsUpdate -Confirm:$false -Force
 }
-Get-WindowsUpdate -install -acceptall -Confirm:$false
+Get-WindowsUpdate -install -acceptall -autoreboot -Confirm:$false
 # Install-WindowsUpdate -Confirm:$false

@@ -2,6 +2,10 @@
 # Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
 # Or run as a bat file with powershell.exe -executionpolicy bypass -file "AllInOneProgramRemoval.ps1"
 
+# Running Autopilot?
+# Install-Script -Name Upload-WindowsAutopilotDeviceInfo
+# Upload-WindowsAutopilotDeviceInfo.ps1 -TenantName "tenant.onmicrosoft.com" -OrderIdentifier "AADUserDriven" -Verbose
+
 #Logging for debugging
 Function Log {
   param(
