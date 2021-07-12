@@ -2,10 +2,6 @@
 # 28/06/2021
 # Script to run immediately after OOBE to clean things up.
 
-#Unpin Microsoft Store
-$appname = "Microsoft Store"
-((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where-Object{$_.Name -eq $appname}).Verbs() | Where-Object{$_.Name.replace('&','') -match 'Unpin from taskbar'} | ForEach-Object{$_.DoIt(); $exec = $true}
-
 #Set Search Bar to Icon
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
 $Name = "SearchboxTaskbarMode"
@@ -53,4 +49,8 @@ If($null -eq $TaskBar.GetValue($Name)) {
    Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 
-Stop-Process -ProcessName explorer
+#Unpin Microsoft Store
+$appname = "Microsoft Store"
+((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where-Object{$_.Name -eq $appname}).Verbs() | Where-Object{$_.Name.replace('&','') -match 'Unpin from taskbar'} | ForEach-Object{$_.DoIt(); $exec = $true}
+
+New-Item -Path "C:\" -Name "IT Centre" -ItemType "directory"
