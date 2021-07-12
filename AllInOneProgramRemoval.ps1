@@ -330,7 +330,7 @@ $cmdArgList = @(
 	"/quiet",
 	"/oobe",
 	"/shutdown",
-	"/unattend:$Path"
+	"/unattend:$destination"
 )
 If ($Exist) {
     & $SysPrep $cmdArgList
