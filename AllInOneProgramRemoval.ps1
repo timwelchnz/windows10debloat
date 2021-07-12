@@ -43,40 +43,7 @@ Switch ($continue) {
   }
 }
 
-$path = $Env:windir + '\system32\oobe\info\'
-If (-not(Test-Path -Path $path -PathType Container)) {
-    $null = New-Item -ItemType Directory -Path $path -ErrorAction Continue
-}
-$oobexmlStr = @"
-<FirstExperience>
-  <oobe>
-    <defaults>
-      <language>1033</language>
-      <location>183</location>
-      <keyboard>1409:00000409</keyboard>
-      <timezone>New Zealand Standard Time</timezone>
-      <adjustForDST>true</adjustForDST>
-    </defaults>
-  </oobe>
-</FirstExperience>
-"@
-add-content $path\oobe.xml $oobexmlStr
 
-# Run Script after OOBE to clean up
-$ScriptPath = $Env:windir + '\Setup\Scripts\'
-If (-not(Test-Path -Path $ScriptPath -PathType Container)) {
-    $null = New-Item -ItemType Directory -Path $ScriptPath -ErrorAction Continue
-}
-# Source file location
-$source = 'https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/afteroobe.ps1'
-# Destination to save the file
-$destination = $ScriptPath + 'afteroobe.ps1'
-#Download the file
-Invoke-WebRequest -Uri $source -OutFile $destination
-
-$scriptStr = 'PowerShell.exe -NoProfile -ExecutionPolicy Bypass -File .\afteroobe.ps1'
-$afteroobe = $ScriptPath + 'setupcomplete.cmd'
-Add-Content -Path $afteroobe $scriptStr
 
 Log "Unpin Microsoft Store"
 #Unpin Microsoft Store from Taskbar - https://docs.microsoft.com/en-us/answers/questions/214599/unpin-icons-from-taskbar-in-windows-10-20h2.html
@@ -317,6 +284,55 @@ Remove-Item "C:\Users\*\Desktop\*.lnk" -Force
 #Run Windows Updates
 Install-PackageProvider -Name NuGet -Force 
 Install-Module PSWindowsUpdate -Confirm:$false -Force
-Get-WindowsUpdate -install -acceptall -autoreboot -Confirm:$false -Verbose
+Get-WindowsUpdate -install -acceptall -Confirm:$false -Verbose #-autoreboot
 
+# At this point we can exist if run on a non-new machine that will never run OOBE
+
+$path = $Env:windir + '\system32\oobe\info\'
+If (-not(Test-Path -Path $path -PathType Container)) {
+    $null = New-Item -ItemType Directory -Path $path -ErrorAction Continue
+}
+$oobexmlStr = @"
+<FirstExperience>
+  <oobe>
+    <defaults>
+      <language>1033</language>
+      <location>183</location>
+      <keyboard>1409:00000409</keyboard>
+      <timezone>New Zealand Standard Time</timezone>
+      <adjustForDST>true</adjustForDST>
+    </defaults>
+  </oobe>
+</FirstExperience>
+"@
+add-content $path\oobe.xml $oobexmlStr
+
+# Run Script after OOBE to clean up
+$ScriptPath = $Env:windir + '\Panther\'
+If (-not(Test-Path -Path $ScriptPath -PathType Container)) {
+    $null = New-Item -ItemType Directory -Path $ScriptPath -ErrorAction Continue
+}
+# Source file location
+$source = 'https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/afteroobe.ps1'
+# Destination to save the file
+$destination = $ScriptPath + 'afteroobe.ps1'
+#Download the file
+Invoke-WebRequest -Uri $source -OutFile $destination
+Unblock-File -Path $destination
+
+$source = 'https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/unattend.xml'
+$destination = $ScriptPath + 'unattend.xml'
+Invoke-WebRequest -Uri $source -OutFile $destination
+
+$Exist = Test-Path -Path $destination
+$SysPrep = $env:windir + '\System32\Sysprep\sysprep.exe'
+$cmdArgList = @(
+	"/quiet",
+	"/oobe",
+	"/shutdown",
+	"/unattend:$Path"
+)
+If ($Exist) {
+    & $SysPrep $cmdArgList
+}
 
