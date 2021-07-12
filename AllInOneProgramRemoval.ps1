@@ -284,9 +284,12 @@ Remove-Item "C:\Users\*\Desktop\*.lnk" -Force
 #Run Windows Updates
 Install-PackageProvider -Name NuGet -Force 
 Install-Module PSWindowsUpdate -Confirm:$false -Force
-Get-WindowsUpdate -install -acceptall -Confirm:$false -Verbose #-autoreboot
+Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose #-autoreboot
 
 # At this point we can exist if run on a non-new machine that will never run OOBE
+
+# Otherwise we need to kill Sysprep before trying to run it again...
+Stop-Process -name Sysprep -Force
 
 $path = $Env:windir + '\system32\oobe\info\'
 If (-not(Test-Path -Path $path -PathType Container)) {
