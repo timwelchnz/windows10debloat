@@ -287,7 +287,14 @@ Install-Module PSWindowsUpdate -Confirm:$false -Force
 Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose #-autoreboot
 
 # At this point we can exist if run on a non-new machine that will never run OOBE
-
+$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue to run Sysprep?","Run SYSPREP on this System", "YesNo" , "Information" , "Button1")
+Switch ($continue) {
+  'Yes' {}
+  'No' { 
+    Restart-computer -Force -Confirm:$false
+    Exit 
+  }
+}
 # Otherwise we need to kill Sysprep before trying to run it again...
 Stop-Process -name Sysprep -Force
 
