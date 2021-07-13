@@ -331,18 +331,21 @@ Invoke-WebRequest -Uri $source -OutFile $destination
 Unblock-File -Path $destination
 
 $source = 'https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/unattend.xml'
-$destination = $ScriptPath + 'unattend.xml'
-Invoke-WebRequest -Uri $source -OutFile $destination
+$ScriptPath = $Env:windir + '\Panther\'
+$UnattendXML = $ScriptPath + 'unattend.xml'
+Invoke-WebRequest -Uri $source -OutFile $UnattendXML
 
-$Exist = Test-Path -Path $destination
-$SysPrep = $env:windir + '\System32\Sysprep\sysprep.exe'
-$cmdArgList = @(
-	"/quiet",
-	"/oobe",
-	"/shutdown",
-	"/unattend:$destination"
-)
+$SysPrep = $Env:windir + '\System32\Sysprep\sysprep.exe'
+# Write a cmd file and run it for Sysprep?
+$SysPrepCMD = @"
+  $SysPrep /quiet /oobe /shutdown /unattend:$UnattendXML
+"@
+add-content $ScriptPath\runsysprep.cmd $SysPrepCMD
+
+$Exist = (Test-Path -Path $UnattendXML) -and (Test-Path -Path $ScriptPath\runsysprep.cmd)
+
 If ($Exist) {
-    & $SysPrep $cmdArgList
+    # & $SysPrep $cmdArgList
+    Invoke-Item $ScriptPath\runsysprep.cmd
 }
-
+Exit
