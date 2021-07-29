@@ -337,9 +337,7 @@ Invoke-WebRequest -Uri $source -OutFile $UnattendXML
 
 $SysPrep = $Env:windir + '\System32\Sysprep\sysprep.exe'
 # Write a cmd file and run it for Sysprep?
-$SysPrepCMD = @"
-  $SysPrep /quiet /oobe /shutdown /unattend:$UnattendXML
-"@
+$SysPrepCMD = @"$SysPrep /quiet /oobe /shutdown /unattend:$UnattendXML"@
 add-content $ScriptPath\runsysprep.cmd $SysPrepCMD
 
 $Exist = (Test-Path -Path $UnattendXML) -and (Test-Path -Path $ScriptPath\runsysprep.cmd)
@@ -348,4 +346,3 @@ If ($Exist) {
     # & $SysPrep $cmdArgList
     Invoke-Item $ScriptPath\runsysprep.cmd
 }
-Exit
