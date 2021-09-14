@@ -252,31 +252,27 @@ Stop-Process -ProcessName explorer
 remove-item $Env:TEMP\startlayout.xml -ErrorAction SilentlyContinue -Force
 Log "Completed importing new Start Menu"
 
-Log "Beginning Installation of Chocolatey and apps"
-#Installation of Chocolatey and Apps
-Set-ExecutionPolicy Bypass -Scope Process -Force
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-choco feature enable -n allowGlobalConfirmation
+Log "Download and install Winget"
+#Download and install the latest version of Winget CLI Package Manager
+try {
+  Get-Command "winget.exe" -ErrorAction Stop
+}
+catch {
+  $latestRelease = Invoke-WebRequest https://github.com/microsoft/winget-cli/releases/latest -Headers @{"Accept"="application/json"} -UseBasicParsing
+  $json = $latestRelease.Content | ConvertFrom-Json
+  $latestVersion = $json.tag_name
+  $url = "https://github.com/microsoft/winget-cli/releases/download/$latestVersion/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+  $download_path = "$env:USERPROFILE\Downloads\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+  Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
+  Get-Item $download_path | Unblock-File
+  Import-Module -Name Appx -Force
+  Add-AppxPackage -Path $download_path -confirm:$false
+}
+Winget install --id 'Google.Chrome' -h
+Winget install --name 'Adobe Acrobat Reader DC' -h
+Winget install --name 'VLC media player' -h
 
-$chromeInstalled = (Get-Item (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe').'(Default)').VersionInfo
-if ($null -eq $chromeInstalled.FileName) {
-  choco install googlechrome --ignore-checksum -y 
-  Log "Chrome installed"
-}
-else {
-  Log "Chrome already installed"
-}
-
-$AcrobatReaderInstalled = (Get-Item (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\AcroRd32.exe').'(Default)').VersionInfo
-if ($null -eq $AcrobatReaderInstalled.FileName) {
-  choco install adobereader -y
-  Log "Adobe Reader installed"
-}
-else {
-  Log "Adobe Reader already installed"
-}
-Log "Completed installation of chocolatey and apps"
+Log "Completed installation of Winget and apps"
 
 # Remove Desktop links
 Remove-Item "C:\Users\*\Desktop\*.lnk" -Force
