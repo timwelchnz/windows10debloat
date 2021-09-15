@@ -265,7 +265,15 @@ catch {
   $download_path = "$env:USERPROFILE\Downloads\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
   Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
   Get-Item $download_path | Unblock-File
+
+  #WINGET Relies on VCLibs https://docs.microsoft.com/en-us/troubleshoot/cpp/c-runtime-packages-desktop-bridge
+  $VCLibsURL = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
+  $VCLibs_path = "$env:USERPROFILE\Downloads\Microsoft.VCLibs.x64.14.00.Desktop.appx"
+  Invoke-WebRequest -Uri $VCLibsURL -OutFile $VCLibs_path -UseBasicParsing
+  Get-Item $VCLibs_path | Unblock-File
+
   Import-Module -Name Appx -Force
+  Add-AppxPackage -Path $VCLibs_path -confirm:$false
   Add-AppxPackage -Path $download_path -confirm:$false
 }
 Winget install --id 'Google.Chrome' -h
