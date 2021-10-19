@@ -1,4 +1,4 @@
-@powershell.exe -NoProfile -ExecutionPolicy Bypass -Verb RunAs -Command "$_=((Get-Content \"%~f0\") -join \"`n\");iex $_.Substring($_.IndexOf(\"goto :\"+\"EOF\")+9)"
+@powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$_=((Get-Content \"%~f0\") -join \"`n\");iex $_.Substring($_.IndexOf(\"goto :\"+\"EOF\")+9)"
 @goto :EOF
 
 $wlanProfile = @'
