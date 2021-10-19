@@ -276,9 +276,9 @@ catch {
   Add-AppxPackage -Path $VCLibs_path -confirm:$false
   Add-AppxPackage -Path $download_path -confirm:$false
 }
-Winget install --id 'Google.Chrome' -h
-Winget install --name 'Adobe Acrobat Reader DC' -h
-Winget install --name 'VLC media player' -h
+Winget install --Id 'Google.Chrome' -h
+Winget install --Id 'Adobe.AdobeAcrobatReaderDC' -h
+Winget install --Id 'VideoLAN.VLC' -h
 
 Log "Completed installation of Winget and apps"
 
