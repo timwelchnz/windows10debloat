@@ -2,7 +2,7 @@
 @goto :EOF
 
 $WiFi = netsh wlan show networks
-$networks = (($Wifi -match '\d\s:').split(":") -replace "^SSID\s\d+").trim() | ? {$_.trim() -ne ""
+$networks = (($Wifi -match '\d\s:').split(":") -replace "^SSID\s\d+").trim() | ? {$_.trim() -ne ""}
 If ($networks -match 'Wcomp Dirty') {
 	$wlanProfile = @'
 	<?xml version="1.0"?>
