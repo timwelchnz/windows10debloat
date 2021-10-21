@@ -276,7 +276,7 @@ catch {
   Add-AppxPackage -Path $VCLibs_path -confirm:$false
   Add-AppxPackage -Path $download_path -confirm:$false
 }
-Winget install --Id 'Google.Chrome' -h
+Winget install --Id 'Google.Chrome' -h --accept-source-agreements --accept-package-agreements
 Winget install --Id 'Adobe.AdobeAcrobatReaderDC' -h
 Winget install --Id 'VideoLAN.VLC' -h
 
