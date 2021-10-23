@@ -11,8 +11,7 @@ Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
 Get-Item $download_path | Unblock-File
 $value = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -command '$($download_path)'"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name '!Stage2' -Value $value
-
-Clear-Host
+Read-Host -Prompt "Pause:"
 
 #Set Language to NZ 
 Set-Culture en-NZ
