@@ -261,5 +261,4 @@ Remove-Item "C:\Users\*\Desktop\*.lnk" -Force
 Install-PackageProvider -Name NuGet -Force 
 Install-Module PSWindowsUpdate -Confirm:$false -Force
 Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose #-autoreboot
-
 Restart-Computer -Force -Confirm:$false
