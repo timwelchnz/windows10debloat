@@ -1,3 +1,5 @@
+@powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$_=((Get-Content \"%~f0\") -join \"`n\");iex $_.Substring($_.IndexOf(\"goto :\"+\"EOF\")+9)"
+@goto :EOF
 Function Log {
     param(
         [Parameter(Mandatory=$true)][String]$msg
@@ -5,7 +7,7 @@ Function Log {
     Add-Content -Path $env:TEMP\log.txt $msg
 }
 
-$nextStage = "stage2.ps1"
+$nextStage = "stage2.bat"
 $dir = "C:\temp"
 $url = "https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/$($nextStage)"
 $download_path = "$($dir)\$($nextStage)"
