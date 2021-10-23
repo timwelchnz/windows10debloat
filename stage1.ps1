@@ -5,12 +5,19 @@ Function Log {
     Add-Content -Path $env:TEMP\log.txt $msg
 }
 
-$url = "https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/stage2.ps1"
-$download_path = "$Env:TEMP\stage2.ps1"
+$nextStage = "stage2.ps1"
+$dir = "C:\temp"
+$url = "https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/$($nextStage)"
+$download_path = "$($dir)\$($nextStage)"
+$Exist = (Test-Path -Path $dir)
+If (-not $Exist ) {
+    New-Item -Path $dir -ItemType directory
+}
 Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
 Get-Item $download_path | Unblock-File
 $value = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -command '$($download_path)'"
-Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name '!Stage2' -Value $value
+$name = "!$($nextStage)"
+Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value
 Read-Host -Prompt "Pause:"
 
 #Set Language to NZ 
@@ -29,4 +36,5 @@ If ("" -eq $NewComputerName){
 } 
 Rename-Computer -NewName $NewComputerName -Force
 Log "Renamed computer: $NewComputerName"
+Read-Host -Prompt "Pause:"
 Restart-Computer -Force -Confirm:$false
