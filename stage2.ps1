@@ -5,14 +5,20 @@ Function Log {
     Add-Content -Path $env:TEMP\log.txt $msg
 }
 
-$url = "https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/stage3.ps1"
-$download_path = "$Env:TEMP\stage3.ps1"
+$nextStage = "stage3.ps1"
+$dir = "C:\temp"
+$url = "https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/$($nextStage)"
+$download_path = "$($dir)\$($nextStage)"
+$Exist = (Test-Path -Path $dir)
+If (-not $Exist ) {
+    New-Item -Path $dir -ItemType directory
+}
 Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
 Get-Item $download_path | Unblock-File
 $value = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -command '$($download_path)'"
-Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name '!Stage3' -Value $value
-
-Clear-Host
+$name = "!$($nextStage)"
+Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value
+Read-Host -Prompt "Pause:"
 
 Log "Set Search Bar to Icon"
 #Set Search Bar to Icon
