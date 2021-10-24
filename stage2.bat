@@ -17,7 +17,8 @@ If (-not $Exist ) {
 }
 Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
 Get-Item $download_path | Unblock-File
-$value = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -command '$($download_path)'"
+# $value = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -command '$($download_path)'"
+$value = $download_path
 $name = "!$($nextStage)"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value
 Read-Host -Prompt "Pause:"
