@@ -18,7 +18,6 @@ Get-Item $download_path | Unblock-File
 $value = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -command '$($download_path)'"
 $name = "!$($nextStage)"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value
-Read-Host -Prompt "Pause:"
 
 #Set Language to NZ 
 Set-Culture en-NZ
