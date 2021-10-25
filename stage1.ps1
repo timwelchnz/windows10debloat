@@ -38,7 +38,6 @@ $name = "!$($nextStage)"
 $registryPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
 $PropertyType = 'String'
 Try {
-  $RunOnce = Get-Item -Path $registryPath -ErrorAction Continue
   Set-ItemProperty -Path $registryPath -Name $name -Value $value
 }
 Catch {
@@ -46,4 +45,4 @@ Catch {
 }
 # Remove for Production
 Read-Host -Prompt "Restart"
-Restart-Computer -Force -Confirm:$false
+# Restart-Computer -Force -Confirm:$false
