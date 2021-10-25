@@ -36,13 +36,7 @@ Log "Renamed computer: $NewComputerName"
 $value = $download_path
 $name = "!$($nextStage)"
 $registryPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
-$PropertyType = 'String'
-Try {
-  Set-ItemProperty -Path $registryPath -Name $name -Value $value
-}
-Catch {
-  New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType $PropertyType
-}
+New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType $PropertyType
 # Remove for Production
 Read-Host -Prompt "Restart"
 # Restart-Computer -Force -Confirm:$false
