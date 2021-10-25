@@ -19,11 +19,7 @@ If (-not $Exist ) {
 }
 Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
 Get-Item $download_path | Unblock-File
-# $value = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -command '$($download_path)'"
-$value = $download_path
-$name = "!$($nextStage)"
-Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value
-Read-Host -Prompt "Completed adding Stage 3 - Delete for production"
+# Moved adding to registry to end before reboot.
 
 Log "Set Search Bar to Icon"
 #Set Search Bar to Icon
@@ -298,4 +294,10 @@ Remove-Item "C:\Users\*\Desktop\*.lnk" -Force
 Install-PackageProvider -Name NuGet -Force 
 Install-Module PSWindowsUpdate -Confirm:$false -Force
 Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose #-autoreboot
+
+# Add 3rd stage to RunOnce Registry Key
+$value = $download_path
+$name = "!$($nextStage)"
+Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value
+
 Restart-Computer -Force -Confirm:$false

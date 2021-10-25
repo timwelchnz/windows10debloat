@@ -18,14 +18,9 @@ Get-Item $download_path | Unblock-File
 $value = $download_path
 $name = "!$($nextStage)"
 $registryPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
-
 $PropertyType = 'String'
 $RunOnce = Get-Item -Path $registryPath
-If($null -eq $RunOnce.GetValue($name)) {
-  New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType $PropertyType
-} else {
-  Set-ItemProperty -Path $registryPath -Name $name -Value $value
-}
+
 
 #Set Language to NZ 
 Set-Culture en-NZ
@@ -43,5 +38,11 @@ If ("" -eq $NewComputerName){
 } 
 Rename-Computer -NewName $NewComputerName -Force
 Log "Renamed computer: $NewComputerName"
-Read-Host -Prompt "Pause:"
+
+If($null -eq $RunOnce.GetValue($name)) {
+  New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType $PropertyType
+} else {
+  Set-ItemProperty -Path $registryPath -Name $name -Value $value
+}
+
 Restart-Computer -Force -Confirm:$false
