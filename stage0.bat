@@ -40,7 +40,7 @@ If (-Not (Get-NetConnectionProfile).IPv4Connectivity -contains "Internet") {
 	netsh wlan add profile filename=$env:TEMP\wlan.xml
 	}
 	Else {
-		Write-host "Manually connect Wi-Fi or Ethernet..." -BackgroundColor Red
+		Write-host "Manually connect Wi-Fi or Ethernet..." -BackgroundColor Red -ForegroundColor Black
 		Read-host -Prompt "Press a key to continue when connected"
 	}
 }
@@ -55,7 +55,7 @@ while($RemainingAttempts -gt 0) {
         Write-Host "Network connection is Good!" -BackgroundColor Green -ForegroundColor Black
         break
     } else {
-        Write-Host "Network is not connected. Retrying..." -BackgroundColor Red
+        Write-Host "Network is not connected. Retrying..." -BackgroundColor Red -ForegroundColor Black
         Start-Sleep -Seconds ($SleepTimer)
         $RemainingAttempts--
     }

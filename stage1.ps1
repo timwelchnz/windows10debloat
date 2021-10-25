@@ -1,8 +1,8 @@
 Function Log {
-    param(
-        [Parameter(Mandatory=$true)][String]$msg
-    )
-    Add-Content -Path $env:TEMP\log.txt $msg
+  param(
+    [Parameter(Mandatory=$true)][String]$msg
+)
+Add-Content -Path $env:TEMP\log.txt $msg
 }
 
 $nextStage = "stage2.bat"
@@ -15,10 +15,17 @@ If (-not $Exist ) {
 }
 Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
 Get-Item $download_path | Unblock-File
-# $value = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -command '$($download_path)'"
 $value = $download_path
 $name = "!$($nextStage)"
-Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value
+$registryPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
+
+$PropertyType = 'String'
+$RunOnce = Get-Item -Path $registryPath
+If($null -eq $RunOnce.GetValue($name)) {
+  New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType $PropertyType
+} else {
+  Set-ItemProperty -Path $registryPath -Name $name -Value $value
+}
 
 #Set Language to NZ 
 Set-Culture en-NZ
