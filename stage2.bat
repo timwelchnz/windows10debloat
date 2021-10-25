@@ -6,6 +6,8 @@ Function Log {
     )
     Add-Content -Path $env:TEMP\log.txt $msg
 }
+#Add Windows Forms Assembly as it seems to be missing on a lot of machines
+Add-Type -AssemblyName System.Windows.Forms
 
 $nextStage = "stage3.bat"
 $dir = "C:\temp"
@@ -21,7 +23,7 @@ Get-Item $download_path | Unblock-File
 $value = $download_path
 $name = "!$($nextStage)"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value
-Read-Host -Prompt "Pause:"
+Read-Host -Prompt "Completed adding Stage 3 - Delete for production"
 
 Log "Set Search Bar to Icon"
 #Set Search Bar to Icon
@@ -36,6 +38,7 @@ If($null -eq $SearchBar.GetValue($Name)) {
 }
 
 Log "Remove Task View Button"
+Write-Host "Remove Task View Button"
 #Remove Task View Button
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 $Name = "ShowTaskViewButton"
@@ -46,9 +49,9 @@ If($null -eq $TaskBar.GetValue($Name)) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
-Log "Removed Task View Button"
 
-Log "Remove News and Interests"
+Log "Removed Task View Button"
+Write-Host "Remove News and Interests"
 # Remove Microsoft News and Interests from Taskbar
 $registryPath = "HKLM:SOFTWARE\Policies\Microsoft\Windows\Windows Feeds"
 $Name = "EnableFeeds"
@@ -75,6 +78,7 @@ If($null -eq $Cortana.GetValue($Name)) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
+Write-Host "Removed Cortana Button"
 
 Log "Show My Computer on the Desktop"
 #Show My Computer on the Desktop
@@ -89,6 +93,7 @@ Else
 {
     New-ItemProperty -Path $Path -Name $Name -Value 0
 }
+Write-Host "Show My Computer on the Desktop completed"
 
 Log "Remove Meet Now from Taskbar"
 $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
@@ -100,11 +105,13 @@ if ($Exist) {
 } Else {
     New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
 }
+Write-Host "Removed Meet Now from Taskbar"
 
 Log "Disable Turn-on Automatic Setup of Network Connected Devices"
 # DISABLE 'TURN ON AUTOMATIC SETUP OF NETWORK CONNECTED DEVICES' (Automatically adds printers)
 New-Item -Path "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup" -Name "Private"
 New-ItemProperty "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\NcdAutoSetup\Private" -Name "AutoSetup" -Value 0 -PropertyType "DWord"
+Write-Host "Disabled Turn-on Automatic Setup of Network Connected Devices"
 
 Log "Started Provisioned App Removal"
 #Provisioned App Removal List and afterwards loop through the remaining...
@@ -143,8 +150,11 @@ $DefaultRemove = @(
 ForEach ($toremove in $DefaultRemove) {
     Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove | Remove-ProvisionedAppxPackage -Online -AllUsers | Out-Null
     Log "REMOVED: $toremove"
+    Write-Host "REMOVED: $toremove"
+
 }
 Log "Completed automatic removal of provisioned apps"
+Write-Host "Completed automatic removal of provisioned apps"
 
 #Remove Paint 3D edit from Explorer Context
 $AppExtensions = @(
@@ -161,6 +171,7 @@ ForEach ($AppExtension in $AppExtensions) {
   Remove-Item -Path "HKLM:\SOFTWARE\Classes\SystemFileAssociations\$AppExtension\Shell\3D Edit" -Recurse
 }
 Log "Removed Paint3D from Explorer Context"
+Write-Host "Removed Paint3D from Explorer Context"
 
 Log "About to ask to continue to step through the rest of the provisoned apps"
 $continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
@@ -178,11 +189,11 @@ Switch ($continue) {
               'Yes' {
                 Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $files.DisplayName | Remove-ProvisionedAppxPackage -Online -AllUsers | Out-Null
                 Log "REMOVED: $files.DisplayName"
-                Write-Host "REMOVED: $files.DisplayName"
+                Write-Host "REMOVED: $files.DisplayName" -BackgroundColor Red
                   }
               'No' {
                 Log "Kept: $files.DisplayName"
-                Write-Host "Kept: $files.DisplayName"
+                Write-Host "Kept: $files.DisplayName" -BackgroundColor Green
                   }
             }
         }
@@ -252,6 +263,31 @@ catch {
 Winget install --Id 'Google.Chrome' -h --accept-source-agreements
 Winget install --Id 'Adobe.AdobeAcrobatReaderDC' -h
 Winget install --Id 'VideoLAN.VLC' -h
+
+#Ads deliver malware and lead users to install fake programs.
+#Install UBlock Origin Extension in Google Chrome
+$registryPath = "HKLM:\SOFTWARE\Policies\Google\Chrome\ExtensionSettings\cjpalhdlnbpafiamejdnhcphjbkeiagm"
+$Name = "installation_mode"
+$value = "normal_installed"
+$PropertyType = "String"
+New-Item $registryPath -Force
+New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType $PropertyType
+$Name = "update_url"
+$value = "https://clients2.google.com/service/update2/crx"
+$PropertyType = "String"
+New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType $PropertyType
+
+#Install UBlock Origin Extension in Microsoft Edge
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\ExtensionSettings\odfafepnkmbhccpbejgmiehpchacaeak"
+$Name = "installation_mode"
+$value = "normal_installed"
+$PropertyType = "String"
+New-Item $registryPath -Force
+New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType $PropertyType
+$Name = "update_url"
+$value = "https://edge.microsoft.com/extensionwebstorebase/v1/crx"
+$PropertyType = "String"
+New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType $PropertyType
 
 Log "Completed installation of Winget and apps"
 
