@@ -15,12 +15,6 @@ If (-not $Exist ) {
 }
 Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
 Get-Item $download_path | Unblock-File
-$value = $download_path
-$name = "!$($nextStage)"
-$registryPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
-$PropertyType = 'String'
-$RunOnce = Get-Item -Path $registryPath
-
 
 #Set Language to NZ 
 Set-Culture en-NZ
@@ -39,10 +33,17 @@ If ("" -eq $NewComputerName){
 Rename-Computer -NewName $NewComputerName -Force
 Log "Renamed computer: $NewComputerName"
 
-If($null -eq $RunOnce.GetValue($name)) {
-  New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType $PropertyType
-} else {
+$value = $download_path
+$name = "!$($nextStage)"
+$registryPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
+$PropertyType = 'String'
+Try {
+  $RunOnce = Get-Item -Path $registryPath -ErrorAction Continue
   Set-ItemProperty -Path $registryPath -Name $name -Value $value
 }
-
+Catch {
+  New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType $PropertyType
+}
+# Remove for Production
+Read-Host -Prompt "Restart"
 Restart-Computer -Force -Confirm:$false
