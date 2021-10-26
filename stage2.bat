@@ -300,4 +300,4 @@ $value = $download_path
 $name = "!$($nextStage)"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value -Force
 Write-Host "Added $($name) with the value $($value) to the registry"
-Restart-Computer -Force -Confirm:$false
+Restart-Computer -Force -Confirm:$true
