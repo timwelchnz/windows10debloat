@@ -296,7 +296,7 @@ Install-Module PSWindowsUpdate -Confirm:$false -Force
 Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose #-autoreboot
 
 # Add 3rd stage to RunOnce Registry Key
-$value = $download_path
+$value = "$($dir)\$($nextStage)"
 $name = "!$($nextStage)"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value -Force
 Write-Host "Added $($name) with the value $($value) to the registry"
