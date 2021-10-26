@@ -39,4 +39,4 @@ $registryPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
 New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType $PropertyType
 # Remove for Production
 Read-Host -Prompt "Restart"
-# Restart-Computer -Force -Confirm:$false
+Restart-Computer -Force -Confirm:$false
