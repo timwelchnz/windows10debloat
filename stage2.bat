@@ -298,6 +298,6 @@ Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose #-a
 # Add 3rd stage to RunOnce Registry Key
 $value = $download_path
 $name = "!$($nextStage)"
-Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value
-
+Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value -Force
+Write-Host "Added $($name) with the value $($value) to the registry"
 Restart-Computer -Force -Confirm:$false

@@ -37,7 +37,8 @@ $value = $download_path
 $name = "!$($nextStage)"
 $registryPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
 New-Item -Path $registryPath -Force
-New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType $PropertyType
+New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType $PropertyType -Force
 # Remove for Production
+Write-Host "Added $($name) with the value $($value) to the registry"
 Read-Host -Prompt "Restart"
 Restart-Computer -Force -Confirm:$false
