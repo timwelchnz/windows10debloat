@@ -13,7 +13,7 @@ Switch ($continue) {
     Exit 
   }
 }
-Read-Host -Prompt "Pause after Windows Pop-up Message Box" #Remove for production.
+
 # Otherwise we need to kill Sysprep before trying to run it again...
 Stop-Process -name Sysprep -Force
 
@@ -62,7 +62,7 @@ $SysPrep /quiet /oobe /shutdown /unattend:$UnattendXML
 add-content $ScriptPath\runsysprep.cmd $SysPrepCMD
 
 $Exist = (Test-Path -Path $UnattendXML) -and (Test-Path -Path $ScriptPath\runsysprep.cmd)
-
+Remove-Item -Path "C:\temp\*" -Force
 If ($Exist) {
     # & $SysPrep $cmdArgList
     Invoke-Item $ScriptPath\runsysprep.cmd
