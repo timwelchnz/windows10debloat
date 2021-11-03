@@ -53,4 +53,28 @@ If($null -eq $TaskBar.GetValue($Name)) {
 $appname = "Microsoft Store"
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where-Object{$_.Name -eq $appname}).Verbs() | Where-Object{$_.Name.replace('&','') -match 'Unpin from taskbar'} | ForEach-Object{$_.DoIt(); $exec = $true}
 
-New-Item -Path "C:\" -Name "IT Centre" -ItemType "directory"
+#Remove Cortana Button - This is unneeded as we remove Cortana entirely. It doesn't work in NZ
+# $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+# $Name = "ShowCortanaButton"
+# $value = "0"
+# $Cortana = Get-Item -Path $registryPath
+# If($null -eq $Cortana.GetValue($Name)) {
+#   New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
+# } else {
+#   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
+# }
+# Write-Host "Removed Cortana Button"
+
+
+
+
+#Rename PC and reboot
+ 
+If (Test-Path -Path "C:\temp\computername.txt") {
+  $NewComputerName = get-content "C:\temp\computername.txt"
+  Write-Host "New Computer Name is: $($NewComputerName)" 
+}
+else {
+  Write-Host "Unable to rename PC - do it manually"
+}
+
