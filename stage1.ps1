@@ -224,7 +224,7 @@ catch {
 Write-Host "Installing Google Chrome"
 Winget install --Id 'Google.Chrome' -h --accept-source-agreements
 Write-Host "Installing Adobe Acrobat Reader"
-Winget install --Id 'Adobe.AdobeAcrobatReaderDC' -h
+Winget install --Id 'Adobe.Acrobat.Reader.32-bit' -h
 Write-Host "Installing VideoLAN VLC"
 #Installing this prevents users from installing junkware which may contain malware etc when trying to view media.
 Winget install --Id 'VideoLAN.VLC' -h

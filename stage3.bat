@@ -1,20 +1,7 @@
 @powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$_=((Get-Content \"%~f0\") -join \"`n\");iex $_.Substring($_.IndexOf(\"goto :\"+\"EOF\")+9)"
 @goto :EOF
 
-#Add Windows Forms Assembly as it seems to be missing on a lot of machines
-Add-Type -AssemblyName System.Windows.Forms
-
-# At this point we can exit if run on a non-new machine that will never run OOBE
-$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue to run Sysprep?","Run SYSPREP on this System", "YesNo" , "Information" , "Button1")
-Switch ($continue) {
-  'Yes' {}
-  'No' { 
-    Restart-computer -Force -Confirm:$false
-    Exit 
-  }
-}
-
-# Otherwise we need to kill Sysprep before trying to run it again...
+# Kill Sysprep before trying to run it again...
 Stop-Process -name Sysprep -Force
 
 $path = $Env:windir + '\system32\oobe\info\'
@@ -62,7 +49,6 @@ $SysPrep /quiet /oobe /shutdown /unattend:$UnattendXML
 add-content $ScriptPath\runsysprep.cmd $SysPrepCMD
 
 $Exist = (Test-Path -Path $UnattendXML) -and (Test-Path -Path $ScriptPath\runsysprep.cmd)
-Remove-Item -Path "C:\temp\*" -Force
 If ($Exist) {
     # & $SysPrep $cmdArgList
     Invoke-Item $ScriptPath\runsysprep.cmd

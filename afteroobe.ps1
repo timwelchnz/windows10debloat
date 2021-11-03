@@ -65,16 +65,13 @@ $appname = "Microsoft Store"
 # }
 # Write-Host "Removed Cortana Button"
 
-
-
-
 #Rename PC and reboot
- 
 If (Test-Path -Path "C:\temp\computername.txt") {
   $NewComputerName = get-content "C:\temp\computername.txt"
-  Write-Host "New Computer Name is: $($NewComputerName)" 
+  Rename-Computer -NewName $NewComputerName -Force
 }
 else {
   Write-Host "Unable to rename PC - do it manually"
 }
-
+#Remove remaining files
+Remove-Item -Path "C:\temp\*" -Force
