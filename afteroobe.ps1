@@ -75,3 +75,4 @@ else {
 }
 #Remove remaining files
 Remove-Item -Path "C:\temp\*" -Force
+Restart-Computer -Force -Confirm:$false
