@@ -71,7 +71,7 @@ if ($Exist) {
 } Else {
     New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
 }
-Write-Host "Removed Meet Now from Taskbar"
+Write-Host "Removed Meet Now from Taskbar" -BackgroundColor Green
 
 Write-Host "Disable Turn-on Automatic Setup of Network Connected Devices"
 # DISABLE 'TURN ON AUTOMATIC SETUP OF NETWORK CONNECTED DEVICES' (Automatically adds printers)
@@ -118,7 +118,7 @@ ForEach ($toremove in $DefaultRemove) {
     Write-Host "REMOVED: $toremove"
 
 }
-Write-Host "Completed automatic removal of provisioned apps"
+Write-Host "Completed automatic removal of provisioned apps" -BackgroundColor Green
 
 #Remove Paint 3D edit from Explorer Context
 $AppExtensions = @(
@@ -134,7 +134,7 @@ $AppExtensions = @(
 ForEach ($AppExtension in $AppExtensions) {
   Remove-Item -Path "HKLM:\SOFTWARE\Classes\SystemFileAssociations\$AppExtension\Shell\3D Edit" -Recurse
 }
-Write-Host "Removed Paint3D from Explorer Context"
+Write-Host "Removed Paint3D from Explorer Context" -BackgroundColor Green
 
 Write-Host "About to ask to continue to step through the rest of the provisoned apps"
 $continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
@@ -195,9 +195,9 @@ Remove-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -
 Remove-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "StartLayoutFile" -Force
 Stop-Process -ProcessName explorer
 remove-item $Env:TEMP\startlayout.xml -ErrorAction SilentlyContinue -Force
-Write-Host "Completed importing new Start Menu"
+Write-Host "Completed importing new Start Menu" -BackgroundColor Green
 
-Write-Host "Download and install Winget"
+Write-Host "Download and install Winget" -BackgroundColor Blue
 #Download and install the latest version of Winget CLI Package Manager
 try {
   Get-Command "winget.exe" -ErrorAction Stop
@@ -221,16 +221,16 @@ catch {
   Add-AppxPackage -Path $VCLibs_path -confirm:$false
   Add-AppxPackage -Path $download_path -confirm:$false
 }
-Write-Host "Installing Google Chrome"
+Write-Host "Installing Google Chrome" -BackgroundColor Green
 Winget install --Id 'Google.Chrome' -h --accept-source-agreements --accept-package-agreements
-Write-Host "Installing Adobe Acrobat Reader"
+Write-Host "Installing Adobe Acrobat Reader" -BackgroundColor Green
 Winget install --Id 'Adobe.Acrobat.Reader.32-bit' -h --accept-source-agreements --accept-package-agreements
-Write-Host "Installing VideoLAN VLC"
+Write-Host "Installing VideoLAN VLC" -BackgroundColor Green
 #Installing this prevents users from installing junkware which may contain malware etc when trying to view media.
 Winget install --Id 'VideoLAN.VLC' -h --accept-source-agreements --accept-package-agreements
 
 #Ads deliver malware and lead users to install fake programs.
-Write-Host "Installing UBlock Origin Extension in Google Chrome"
+Write-Host "Installing UBlock Origin Extension in Google Chrome" -BackgroundColor Blue
 $registryPath = "HKLM:\SOFTWARE\Policies\Google\Chrome\ExtensionSettings\cjpalhdlnbpafiamejdnhcphjbkeiagm"
 $Name = "installation_mode"
 $value = "normal_installed"
@@ -242,7 +242,7 @@ $value = "https://clients2.google.com/service/update2/crx"
 $PropertyType = "String"
 New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType $PropertyType
 
-Write-Host "Installing UBlock Origin Extension in Microsoft Edge"
+Write-Host "Installing UBlock Origin Extension in Microsoft Edge" -BackgroundColor Blue
 $registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\ExtensionSettings\odfafepnkmbhccpbejgmiehpchacaeak"
 $Name = "installation_mode"
 $value = "normal_installed"
@@ -254,17 +254,17 @@ $value = "https://edge.microsoft.com/extensionwebstorebase/v1/crx"
 $PropertyType = "String"
 New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType $PropertyType
 
-Write-Host "Completed installation of Winget and apps"
+Write-Host "Completed installation of Winget and apps" -BackgroundColor Green
 
-Write-Host "Removing Desktop links"
+Write-Host "Removing Desktop links" -BackgroundColor Blue
 Remove-Item "C:\Users\*\Desktop\*.lnk" -Force
 
-Write-Host "Set Windows Update to update other Microsoft Products"
+Write-Host "Set Windows Update to update other Microsoft Products" -BackgroundColor Blue
 $ServiceManager = New-Object -ComObject "Microsoft.Update.ServiceManager"
 $ServiceManager.ClientApplicationID = "Update Other Microsoft Products"
 $NewService = $ServiceManager.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
 
-Write-Host "Checking if HP and remove bloatware..."
+Write-Host "Checking if HP and remove bloatware..." -BackgroundColor Blue
 $Manufacturer = (Get-CimInstance -ClassName Win32_ComputerSystem).Manufacturer
 If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   # List of built-in apps to remove
@@ -293,12 +293,17 @@ If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   Remove-Item -Path "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Proefversies.lnk" -Force -Recurse -ErrorAction SilentlyContinue
 }
 else {
-  Write-Host "This host is not an HP"
+  Write-Host "This host is not an HP" -BackgroundColor Orange
 }
 
-Write-Host "Running Windows Updates"
-Install-PackageProvider -Name NuGet -Force 
+Clear-Host 
+Write-Host "Running Windows Updates" -BackgroundColor Blue
+Set-ExecutionPolicy Bypass -Force -Confirm:$false
+Install-PackageProvider -Name NuGet -Force
+Write-Host "Installed NuGet" -BackgroundColor Green
 Install-Module PSWindowsUpdate -Confirm:$false -Force
+Write-Host "Installed PSWindowsUpdate" -BackgroundColor Green
+Write-Host "Running Get-WindowsUpdate" -BackgroundColor Orange
 Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose
 Read-Host "Did Get-WindowsUpdate work?"
 
