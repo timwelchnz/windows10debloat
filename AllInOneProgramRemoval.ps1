@@ -138,6 +138,7 @@ Log "Started Provisioned App Removal"
 $DefaultRemove = @(
     "Microsoft.549981C3F5F10"
     "Microsoft.BingWeather"
+    "Microsoft.BingNews"
     "Microsoft.GetHelp"
     "Microsoft.Getstarted"
     "Microsoft.Microsoft3DViewer"
