@@ -12,13 +12,15 @@ If (-not $Exist ) {
 Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
 Get-Item $download_path | Unblock-File
 
-#Re-run Windows Update as it then installs the latest Optional Updates
+Write-Host "Re-running Windows Update as it then installs the latest Optional Updates"
 Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose
+Read-Host "Did Get-WindowsUpdate work?"
 
-#Clean Up Temp Files
+Write-Host "Cleaning Up Temp Files"
 $clnmgr = "cleanmgr.exe"
 $arguments = "/AUTOCLEAN"
 start-process $clnmgr $arguments -NoNewWindow -Wait
+Read-Host "Did CleanMgr Work?"
 
 # Add 3rd stage to RunOnce Registry Key
 $value = "$($dir)\$($nextStage)"

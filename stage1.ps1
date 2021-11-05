@@ -256,15 +256,15 @@ New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType $Pr
 
 Write-Host "Completed installation of Winget and apps"
 
-# Remove Desktop links
+Write-Host "Removing Desktop links"
 Remove-Item "C:\Users\*\Desktop\*.lnk" -Force
 
-# Set Windows Update to update other Microsoft Products
+Write-Host "Set Windows Update to update other Microsoft Products"
 $ServiceManager = New-Object -ComObject "Microsoft.Update.ServiceManager"
 $ServiceManager.ClientApplicationID = "Update Other Microsoft Products"
 $NewService = $ServiceManager.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
 
-# Check if HP and remove bloatware
+Write-Host "Checking if HP and remove bloatware..."
 $Manufacturer = (Get-CimInstance -ClassName Win32_ComputerSystem).Manufacturer
 If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   # List of built-in apps to remove
@@ -281,7 +281,7 @@ If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   # $InstalledPackages = Get-AppxPackage -AllUsers | Where {($UninstallPackages -contains $_.Name)} #-or ($_.Name -match "^$HPidentifier")}
   # $ProvisionedPackages = Get-AppxProvisionedPackage -Online | Where {($UninstallPackages -contains $_.DisplayName)} #-or ($_.DisplayName -match "^$HPidentifier")}
   # $InstalledPrograms = Get-Package | Where {$UninstallPrograms -contains $_.Name}
-  Get-Package | Where Name -contains "HP Wolf*" | Uninstall-Package -AllVersions -Force
+  Get-Package | Where-Object Name -contains "HP Wolf*" | Uninstall-Package -AllVersions -Force
 
   # Remove HP Shortcuts
   Remove-Item -LiteralPath "C:\ProgramData\HP\TCO" -Force -Recurse -ErrorAction SilentlyContinue
@@ -292,13 +292,17 @@ If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   Remove-Item -LiteralPath "C:\Program Files (x86)\Online Services" -Force -Recurse -ErrorAction SilentlyContinue
   Remove-Item -Path "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Proefversies.lnk" -Force -Recurse -ErrorAction SilentlyContinue
 }
+else {
+  Write-Host "This host is not an HP"
+}
 
-#Run Windows Updates
+Write-Host "Running Windows Updates"
 Install-PackageProvider -Name NuGet -Force 
 Install-Module PSWindowsUpdate -Confirm:$false -Force
-Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose #-autoreboot
+Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose
+Read-Host "Did Get-WindowsUpdate work?"
 
-# Add 3rd stage to RunOnce Registry Key
+# Add 2rd stage to RunOnce Registry Key
 $value = "$($dir)\$($nextStage)"
 $name = "!$($nextStage)"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value -Force
