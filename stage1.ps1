@@ -2,7 +2,7 @@
 # Tim Welch
 # BUILD SCRIPT FOR WINDOWS 10
 
-$nextStage = "stage3.bat"
+$nextStage = "stage2.bat"
 $dir = "C:\temp"
 $url = "https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/$($nextStage)"
 $download_path = "$($dir)\$($nextStage)"
@@ -222,12 +222,12 @@ catch {
   Add-AppxPackage -Path $download_path -confirm:$false
 }
 Write-Host "Installing Google Chrome"
-Winget install --Id 'Google.Chrome' -h --accept-source-agreements
+Winget install --Id 'Google.Chrome' -h --accept-source-agreements --accept-package-agreements
 Write-Host "Installing Adobe Acrobat Reader"
-Winget install --Id 'Adobe.Acrobat.Reader.32-bit' -h
+Winget install --Id 'Adobe.Acrobat.Reader.32-bit' -h --accept-source-agreements --accept-package-agreements
 Write-Host "Installing VideoLAN VLC"
 #Installing this prevents users from installing junkware which may contain malware etc when trying to view media.
-Winget install --Id 'VideoLAN.VLC' -h
+Winget install --Id 'VideoLAN.VLC' -h --accept-source-agreements --accept-package-agreements
 
 #Ads deliver malware and lead users to install fake programs.
 Write-Host "Installing UBlock Origin Extension in Google Chrome"
