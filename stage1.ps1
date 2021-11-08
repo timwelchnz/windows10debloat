@@ -200,35 +200,49 @@ Write-Host "Completed importing new Start Menu" -BackgroundColor Green
 
 Write-Host "Download and install Winget" -BackgroundColor Blue
 #Download and install the latest version of Winget CLI Package Manager
-try {
-  Get-Command "winget.exe" -ErrorAction Stop
-}
-catch {
-  $latestRelease = Invoke-WebRequest https://github.com/microsoft/winget-cli/releases/latest -Headers @{"Accept"="application/json"} -UseBasicParsing
-  $json = $latestRelease.Content | ConvertFrom-Json
-  $latestVersion = $json.tag_name
-  $url = "https://github.com/microsoft/winget-cli/releases/download/$latestVersion/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-  $download_path = "$env:USERPROFILE\Downloads\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-  Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
-  Get-Item $download_path | Unblock-File
+# 09/11/21 - Found new way to check for winget and install...
+# try {
+#   Get-Command "winget.exe" -ErrorAction Stop
+# }
+# catch {
+#   $latestRelease = Invoke-WebRequest https://github.com/microsoft/winget-cli/releases/latest -Headers @{"Accept"="application/json"} -UseBasicParsing
+#   $json = $latestRelease.Content | ConvertFrom-Json
+#   $latestVersion = $json.tag_name
+#   $url = "https://github.com/microsoft/winget-cli/releases/download/$latestVersion/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+#   $download_path = "$env:USERPROFILE\Downloads\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+#   Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
+#   Get-Item $download_path | Unblock-File
 
-  #WINGET Relies on VCLibs https://docs.microsoft.com/en-us/troubleshoot/cpp/c-runtime-packages-desktop-bridge
-  $VCLibsURL = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
-  $VCLibs_path = "$env:USERPROFILE\Downloads\Microsoft.VCLibs.x64.14.00.Desktop.appx"
-  Invoke-WebRequest -Uri $VCLibsURL -OutFile $VCLibs_path -UseBasicParsing
-  Get-Item $VCLibs_path | Unblock-File
+#   #WINGET Relies on VCLibs https://docs.microsoft.com/en-us/troubleshoot/cpp/c-runtime-packages-desktop-bridge
+#   $VCLibsURL = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
+#   $VCLibs_path = "$env:USERPROFILE\Downloads\Microsoft.VCLibs.x64.14.00.Desktop.appx"
+#   Invoke-WebRequest -Uri $VCLibsURL -OutFile $VCLibs_path -UseBasicParsing
+#   Get-Item $VCLibs_path | Unblock-File
 
-  Import-Module -Name Appx -Force
-  Add-AppxPackage -Path $VCLibs_path -confirm:$false
-  Add-AppxPackage -Path $download_path -confirm:$false
+#   Import-Module -Name Appx -Force
+#   Add-AppxPackage -Path $VCLibs_path -confirm:$false
+#   Add-AppxPackage -Path $download_path -confirm:$false
+# }
+# Check if winget is installed
+if (Test-Path ~\AppData\Local\Microsoft\WindowsApps\winget.exe){
+  Write-Host "Winget Already Installed"
+}  
+else{
+  # Installing winget from the Microsoft Store
+  Write-Host "Winget not found, installing it now."
+  Start-Process "ms-appinstaller:?source=https://aka.ms/getwinget"
+  $nid = (Get-Process AppInstaller).Id
+  Wait-Process -Id $nid
+  Write-Host Winget Installed
 }
+
 Write-Host "Installing Google Chrome" -BackgroundColor Green
-Winget install --Id 'Google.Chrome' -h --accept-source-agreements --accept-package-agreements
+Winget install -e 'Google.Chrome' -h --accept-source-agreements --accept-package-agreements | Out-Host
 Write-Host "Installing Adobe Acrobat Reader" -BackgroundColor Green
-Winget install --Id 'Adobe.Acrobat.Reader.32-bit' -h --accept-source-agreements --accept-package-agreements
+Winget install -e 'Adobe.Acrobat.Reader.32-bit' -h --accept-source-agreements --accept-package-agreements | Out-Host
 Write-Host "Installing VideoLAN VLC" -BackgroundColor Green
 #Installing this prevents users from installing junkware which may contain malware etc when trying to view media.
-Winget install --Id 'VideoLAN.VLC' -h --accept-source-agreements --accept-package-agreements
+Winget install -e 'VideoLAN.VLC' -h --accept-source-agreements --accept-package-agreements | Out-Host
 
 #Ads deliver malware and lead users to install fake programs.
 Write-Host "Installing UBlock Origin Extension in Google Chrome" -BackgroundColor Blue
