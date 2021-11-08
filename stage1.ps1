@@ -200,29 +200,28 @@ Write-Host "Completed importing new Start Menu" -BackgroundColor Green
 
 Write-Host "Download and install Winget" -BackgroundColor Blue
 #Download and install the latest version of Winget CLI Package Manager
-# 09/11/21 - Found new way to check for winget and install...
-# try {
-#   Get-Command "winget.exe" -ErrorAction Stop
-# }
-# catch {
-#   $latestRelease = Invoke-WebRequest https://github.com/microsoft/winget-cli/releases/latest -Headers @{"Accept"="application/json"} -UseBasicParsing
-#   $json = $latestRelease.Content | ConvertFrom-Json
-#   $latestVersion = $json.tag_name
-#   $url = "https://github.com/microsoft/winget-cli/releases/download/$latestVersion/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-#   $download_path = "$env:USERPROFILE\Downloads\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-#   Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
-#   Get-Item $download_path | Unblock-File
+try {
+  Get-Command "winget.exe" -ErrorAction Stop
+}
+catch {
+  $latestRelease = Invoke-WebRequest https://github.com/microsoft/winget-cli/releases/latest -Headers @{"Accept"="application/json"} -UseBasicParsing
+  $json = $latestRelease.Content | ConvertFrom-Json
+  $latestVersion = $json.tag_name
+  $url = "https://github.com/microsoft/winget-cli/releases/download/$latestVersion/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+  $download_path = "$env:USERPROFILE\Downloads\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+  Invoke-WebRequest -Uri $url -OutFile $download_path -UseBasicParsing
+  Get-Item $download_path | Unblock-File
 
-#   #WINGET Relies on VCLibs https://docs.microsoft.com/en-us/troubleshoot/cpp/c-runtime-packages-desktop-bridge
-#   $VCLibsURL = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
-#   $VCLibs_path = "$env:USERPROFILE\Downloads\Microsoft.VCLibs.x64.14.00.Desktop.appx"
-#   Invoke-WebRequest -Uri $VCLibsURL -OutFile $VCLibs_path -UseBasicParsing
-#   Get-Item $VCLibs_path | Unblock-File
+  #WINGET Relies on VCLibs https://docs.microsoft.com/en-us/troubleshoot/cpp/c-runtime-packages-desktop-bridge
+  $VCLibsURL = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
+  $VCLibs_path = "$env:USERPROFILE\Downloads\Microsoft.VCLibs.x64.14.00.Desktop.appx"
+  Invoke-WebRequest -Uri $VCLibsURL -OutFile $VCLibs_path -UseBasicParsing
+  Get-Item $VCLibs_path | Unblock-File
 
-#   Import-Module -Name Appx -Force
-#   Add-AppxPackage -Path $VCLibs_path -confirm:$false
-#   Add-AppxPackage -Path $download_path -confirm:$false
-# }
+  Import-Module -Name Appx -Force
+  Add-AppxPackage -Path $VCLibs_path -confirm:$false
+  Add-AppxPackage -Path $download_path -confirm:$false
+}
 
 Write-Host "Installing Google Chrome" -BackgroundColor Green
 Winget install -e 'Google.Chrome' -h --accept-source-agreements --accept-package-agreements | Out-Host
