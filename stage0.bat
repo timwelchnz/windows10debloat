@@ -49,7 +49,7 @@ If (-Not (Get-NetConnectionProfile).IPv4Connectivity -contains "Internet") {
 [int]$Attempts = "5"
 $AttemptsCounter = 0
 $RemainingAttempts = $Attempts - $AttemptsCounter
-Write-Host "Testing to see if netowrk connection is avilable..."
+Write-Host "Testing to see if network connection is avilable..."
 while($RemainingAttempts -gt 0) {
     if(Test-Connection raw.githubusercontent.com -Quiet -Count 1) {
         Write-Host "Network connection is Good!" -BackgroundColor Green -ForegroundColor Black

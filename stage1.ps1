@@ -33,7 +33,7 @@ Write-Host "New computername after OOBE will be: $NewComputerName"
 #Add Windows Forms Assembly as it seems to be missing on a lot of machines
 Add-Type -AssemblyName System.Windows.Forms
 
-$nextStage = "stage3.bat"
+$nextStage = "stage2.bat"
 $dir = "C:\temp"
 $url = "https://raw.githubusercontent.com/timwelchnz/windows10debloat/main/$($nextStage)"
 $download_path = "$($dir)\$($nextStage)"
@@ -223,18 +223,6 @@ Write-Host "Download and install Winget" -BackgroundColor Blue
 #   Add-AppxPackage -Path $VCLibs_path -confirm:$false
 #   Add-AppxPackage -Path $download_path -confirm:$false
 # }
-# Check if winget is installed
-if (Test-Path ~\AppData\Local\Microsoft\WindowsApps\winget.exe){
-  Write-Host "Winget Already Installed"
-}  
-else{
-  # Installing winget from the Microsoft Store
-  Write-Host "Winget not found, installing it now."
-  Start-Process "ms-appinstaller:?source=https://aka.ms/getwinget"
-  $nid = (Get-Process AppInstaller).Id
-  Wait-Process -Id $nid
-  Write-Host Winget Installed
-}
 
 Write-Host "Installing Google Chrome" -BackgroundColor Green
 Winget install -e 'Google.Chrome' -h --accept-source-agreements --accept-package-agreements | Out-Host
@@ -320,11 +308,9 @@ Install-Module PSWindowsUpdate -Confirm:$false -Force
 Write-Host "Installed PSWindowsUpdate" -BackgroundColor Green
 Write-Host "Running Get-WindowsUpdate" -BackgroundColor Orange
 Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose
-# Read-Host "Did Get-WindowsUpdate work?"
 
 # Add 2rd stage to RunOnce Registry Key
 $value = "$($dir)\$($nextStage)"
 $name = "!$($nextStage)"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value -Force
-Read-Host -Prompt "Did set next stage to RunOnce work?"
 Restart-Computer -Force -Confirm:$false
