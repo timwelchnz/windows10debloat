@@ -306,10 +306,11 @@ Install-Module PSWindowsUpdate -Confirm:$false -Force
 Write-Host "Installed PSWindowsUpdate" -BackgroundColor Green
 Write-Host "Running Get-WindowsUpdate" -BackgroundColor Orange
 Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose
-Read-Host "Did Get-WindowsUpdate work?"
+# Read-Host "Did Get-WindowsUpdate work?"
 
 # Add 2rd stage to RunOnce Registry Key
 $value = "$($dir)\$($nextStage)"
 $name = "!$($nextStage)"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value -Force
+Read-Host -Prompt "Did set next stage to RunOnce work?"
 Restart-Computer -Force -Confirm:$false
