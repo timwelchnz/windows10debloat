@@ -71,7 +71,7 @@ if ($Exist) {
 } Else {
     New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
 }
-Write-Host "Removed Meet Now from Taskbar" -BackgroundColor Green
+Write-Host "Removed Meet Now from Taskbar" -BackgroundColor Green -ForegroundColor Black
 
 Write-Host "Disable Turn-on Automatic Setup of Network Connected Devices"
 # DISABLE 'TURN ON AUTOMATIC SETUP OF NETWORK CONNECTED DEVICES' (Automatically adds printers)
@@ -116,10 +116,9 @@ $DefaultRemove = @(
 
 ForEach ($toremove in $DefaultRemove) {
     Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $toremove | Remove-ProvisionedAppxPackage -Online -AllUsers | Out-Null
-    Write-Host "REMOVED: $toremove"
-
+    Write-Host "REMOVED: $toremove" -BackgroundColor Green -ForegroundColor Black
 }
-Write-Host "Completed automatic removal of provisioned apps" -BackgroundColor Green
+Write-Host "Completed automatic removal of provisioned apps" -BackgroundColor Magenta
 
 #Remove Paint 3D edit from Explorer Context
 $AppExtensions = @(
@@ -135,7 +134,7 @@ $AppExtensions = @(
 ForEach ($AppExtension in $AppExtensions) {
   Remove-Item -Path "HKLM:\SOFTWARE\Classes\SystemFileAssociations\$AppExtension\Shell\3D Edit" -Recurse
 }
-Write-Host "Removed Paint3D from Explorer Context" -BackgroundColor Green
+Write-Host "Removed Paint3D from Explorer Context" -BackgroundColor Green -ForegroundColor Black
 
 Write-Host "About to ask to continue to step through the rest of the provisoned apps"
 $continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
@@ -223,11 +222,11 @@ catch {
   Add-AppxPackage -Path $download_path -confirm:$false
 }
 
-Write-Host "Installing Google Chrome" -BackgroundColor Green
+Write-Host "Installing Google Chrome" -BackgroundColor Green -ForegroundColor Black
 Winget install -e 'Google.Chrome' -h --accept-source-agreements --accept-package-agreements | Out-Host
-Write-Host "Installing Adobe Acrobat Reader" -BackgroundColor Green
+Write-Host "Installing Adobe Acrobat Reader" -BackgroundColor Green -ForegroundColor Black
 Winget install -e 'Adobe.Acrobat.Reader.32-bit' -h --accept-source-agreements --accept-package-agreements | Out-Host
-Write-Host "Installing VideoLAN VLC" -BackgroundColor Green
+Write-Host "Installing VideoLAN VLC" -BackgroundColor Green -ForegroundColor Black
 #Installing this prevents users from installing junkware which may contain malware etc when trying to view media.
 Winget install -e 'VideoLAN.VLC' -h --accept-source-agreements --accept-package-agreements | Out-Host
 
@@ -256,7 +255,7 @@ $value = "https://edge.microsoft.com/extensionwebstorebase/v1/crx"
 $PropertyType = "String"
 New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType $PropertyType
 
-Write-Host "Completed installation of Winget and apps" -BackgroundColor Green
+Write-Host "Completed installation of Winget and apps" -BackgroundColor Green -ForegroundColor Black
 
 Write-Host "Removing Desktop links" -BackgroundColor Blue
 Remove-Item "C:\Users\*\Desktop\*.lnk" -Force
@@ -272,18 +271,35 @@ If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   # List of built-in apps to remove
   $UninstallPackages = @(
       "AD2F1837.HPJumpStarts"
-      "AD2F1837.HPPowerManager"
       "AD2F1837.HPPrivacySettings"
-      "AD2F1837.HPSureShieldAI"
       "AD2F1837.HPQuickDrop"
       "AD2F1837.HPWorkWell"
       "AD2F1837.myHP"
-      "AD2F1837.HPDesktopSupportUtilities"
   )
-  # $InstalledPackages = Get-AppxPackage -AllUsers | Where {($UninstallPackages -contains $_.Name)} #-or ($_.Name -match "^$HPidentifier")}
-  # $ProvisionedPackages = Get-AppxProvisionedPackage -Online | Where {($UninstallPackages -contains $_.DisplayName)} #-or ($_.DisplayName -match "^$HPidentifier")}
+  $InstalledPackages = Get-AppxPackage -AllUsers | Where-Object {($UninstallPackages -contains $_.Name)} #-or ($_.Name -match "^$HPidentifier")}
+  $ProvisionedPackages = Get-AppxProvisionedPackage -Online | Where-Object {($UninstallPackages -contains $_.DisplayName)} #-or ($_.DisplayName -match "^$HPidentifier")}
+  
+  ForEach ($ProvPackage in $ProvisionedPackages) {
+    Write-Host -Object "Attempting to remove provisioned package: [$($ProvPackage.DisplayName)]..."
+    Try {
+        $Null = Remove-AppxProvisionedPackage -PackageName $ProvPackage.PackageName -Online -ErrorAction Stop
+        Write-Host -Object "Successfully removed provisioned package: [$($ProvPackage.DisplayName)]"
+    }
+    Catch {Write-Warning -Message "Failed to remove provisioned package: [$($ProvPackage.DisplayName)]"}
+  }
+  ForEach ($AppxPackage in $InstalledPackages) {
+    Write-Host -Object "Attempting to remove Appx package: [$($AppxPackage.Name)]..."
+    Try {
+        $Null = Remove-AppxPackage -Package $AppxPackage.PackageFullName -AllUsers -ErrorAction Stop
+        Write-Host -Object "Successfully removed Appx package: [$($AppxPackage.Name)]"
+    }
+    Catch {Write-Warning -Message "Failed to remove Appx package: [$($AppxPackage.Name)]"}
+  }
+
   # $InstalledPrograms = Get-Package | Where {$UninstallPrograms -contains $_.Name}
   Get-Package | Where-Object Name -contains "HP Wolf*" | Uninstall-Package -AllVersions -Force
+  Get-Package | Where-Object Name -contains "HP Client Security Manager*" | Uninstall-Package -AllVersions -Force
+  Get-Package | Where-Object Name -contains "HP Security Update Service*" | Uninstall-Package -AllVersions -Force
 
   # Remove HP Shortcuts
   Remove-Item -LiteralPath "C:\ProgramData\HP\TCO" -Force -Recurse -ErrorAction SilentlyContinue
@@ -295,17 +311,17 @@ If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   Remove-Item -Path "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Proefversies.lnk" -Force -Recurse -ErrorAction SilentlyContinue
 }
 else {
-  Write-Host "This host is not an HP" -BackgroundColor Orange
+  Write-Host "This host is not an HP" -BackgroundColor Magenta
 }
 
 Clear-Host 
 Write-Host "Running Windows Updates" -BackgroundColor Blue
 Set-ExecutionPolicy Bypass -Force -Confirm:$false
 Install-PackageProvider -Name NuGet -Force
-Write-Host "Installed NuGet" -BackgroundColor Green
+Write-Host "Installed NuGet" -BackgroundColor Green -ForegroundColor Black
 Install-Module PSWindowsUpdate -Confirm:$false -Force
-Write-Host "Installed PSWindowsUpdate" -BackgroundColor Green
-Write-Host "Running Get-WindowsUpdate" -BackgroundColor Orange
+Write-Host "Installed PSWindowsUpdate" -BackgroundColor Green -ForegroundColor Black
+Write-Host "Running Get-WindowsUpdate" -BackgroundColor Magenta
 Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose
 
 # Add 2rd stage to RunOnce Registry Key
