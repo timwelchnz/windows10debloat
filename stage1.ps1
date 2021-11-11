@@ -195,7 +195,7 @@ Remove-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -
 Remove-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "StartLayoutFile" -Force
 Stop-Process -ProcessName explorer
 remove-item $Env:TEMP\startlayout.xml -ErrorAction SilentlyContinue -Force
-Write-Host "Completed importing new Start Menu" -BackgroundColor Green
+Write-Host "Completed importing new Start Menu" -BackgroundColor Green -ForegroundColor Black
 
 Write-Host "Download and install Winget" -BackgroundColor Blue
 #Download and install the latest version of Winget CLI Package Manager
@@ -300,6 +300,7 @@ If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   Get-Package | Where-Object Name -contains "HP Wolf*" | Uninstall-Package -AllVersions -Force
   Get-Package | Where-Object Name -contains "HP Client Security Manager*" | Uninstall-Package -AllVersions -Force
   Get-Package | Where-Object Name -contains "HP Security Update Service*" | Uninstall-Package -AllVersions -Force
+  # "HP Connection Optimizer"
 
   # Remove HP Shortcuts
   Remove-Item -LiteralPath "C:\ProgramData\HP\TCO" -Force -Recurse -ErrorAction SilentlyContinue
