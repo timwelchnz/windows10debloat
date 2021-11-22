@@ -23,12 +23,21 @@ Set-WinUserLanguageList en-NZ -Force -Confirm:$false
 #Rename Computer - Update 03/11/21 There is no point in doing this as it gets rewritten during OOBE
 Write-Host "Renaming Computer"
 Write-Host "Current computer name is: $env:COMPUTERNAME"
-$NewComputerName = Read-Host "Enter new computer name, or just hit [Enter] to rename to serial number"
-If ("" -eq $NewComputerName){
-    $NewComputerName = Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -ExpandProperty SerialNumber
-} 
-add-content -Path "$($dir)\computername.txt" $NewComputerName
-Write-Host "New computername after OOBE will be: $NewComputerName"
+$Rename = Read-Host -Prompt "Rename Computer Y/N"
+Switch ($Rename) {
+  'y' {
+    $NewComputerName = Read-Host "Enter new computer name, or just hit [Enter] to rename to serial number"
+    If ("" -eq $NewComputerName){
+        $NewComputerName = Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -ExpandProperty SerialNumber
+    } 
+    add-content -Path "$($dir)\computername.txt" $NewComputerName
+    Write-Host "New computername after OOBE will be: $NewComputerName"
+  }
+  'n' {
+
+  }
+}
+
 
 #Add Windows Forms Assembly as it seems to be missing on a lot of machines
 Add-Type -AssemblyName System.Windows.Forms
@@ -266,8 +275,11 @@ $ServiceManager.ClientApplicationID = "Update Other Microsoft Products"
 $NewService = $ServiceManager.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
 
 Write-Host "Checking if HP and remove bloatware..." -BackgroundColor Blue
+Read-Host -Promt "Waiting for input"
 $Manufacturer = (Get-CimInstance -ClassName Win32_ComputerSystem).Manufacturer
 If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
+  Write-Host "This is an HP and we're about to remove bloatware..." -BackgroundColor Blue
+  Read-Host -Promt "Waiting for input"
   # List of built-in apps to remove
   $UninstallPackages = @(
       "AD2F1837.HPJumpStarts"
@@ -313,6 +325,7 @@ If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
 }
 else {
   Write-Host "This host is not an HP" -BackgroundColor Magenta
+  Read-Host -Promt "Waiting for input"
 }
 
 Clear-Host 
