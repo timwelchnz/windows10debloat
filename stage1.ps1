@@ -20,24 +20,15 @@ Set-TimeZone -Name 'New Zealand Standard Time'
 Set-WinHomeLocation -GeoId 0xb7
 Set-WinUserLanguageList en-NZ -Force -Confirm:$false
 
-#Rename Computer - Update 03/11/21 There is no point in doing this as it gets rewritten during OOBE
+#Rename Computer - Update 03/11/21 There is no point in doing this as it gets rewritten during OOBE - so we write it to a file and then rename as part of OOBE
 Write-Host "Renaming Computer"
 Write-Host "Current computer name is: $env:COMPUTERNAME"
-$Rename = Read-Host -Prompt "Rename Computer Y/N"
-Switch ($Rename) {
-  'y' {
-    $NewComputerName = Read-Host "Enter new computer name, or just hit [Enter] to rename to serial number"
-    If ("" -eq $NewComputerName){
-        $NewComputerName = Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -ExpandProperty SerialNumber
-    } 
-    add-content -Path "$($dir)\computername.txt" $NewComputerName
-    Write-Host "New computername after OOBE will be: $NewComputerName"
-  }
-  'n' {
-
-  }
-}
-
+$NewComputerName = Read-Host "Enter new computer name, or just hit [Enter] to rename to serial number"
+If ("" -eq $NewComputerName){
+    $NewComputerName = Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber | Select-Object -ExpandProperty SerialNumber
+} 
+add-content -Path "$($dir)\computername.txt" $NewComputerName
+Write-Host "New computername after OOBE will be: $NewComputerName"
 
 #Add Windows Forms Assembly as it seems to be missing on a lot of machines
 Add-Type -AssemblyName System.Windows.Forms
@@ -309,9 +300,9 @@ If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   }
 
   # $InstalledPrograms = Get-Package | Where {$UninstallPrograms -contains $_.Name}
-  Get-Package | Where-Object Name -contains "HP Wolf*" | Uninstall-Package -AllVersions -Force
-  Get-Package | Where-Object Name -contains "HP Client Security Manager*" | Uninstall-Package -AllVersions -Force
-  Get-Package | Where-Object Name -contains "HP Security Update Service*" | Uninstall-Package -AllVersions -Force
+  Get-Package | Where-Object Name -Like "HP Wolf*" | Uninstall-Package -AllVersions -Force
+  Get-Package | Where-Object Name -Like "HP Client Security Manager*" | Uninstall-Package -AllVersions -Force
+  Get-Package | Where-Object Name -Like "HP Security Update Service*" | Uninstall-Package -AllVersions -Force
   # "HP Connection Optimizer"
 
   # Remove HP Shortcuts
@@ -336,10 +327,12 @@ Write-Host "Installed NuGet" -BackgroundColor Green -ForegroundColor Black
 Install-Module PSWindowsUpdate -Confirm:$false -Force
 Write-Host "Installed PSWindowsUpdate" -BackgroundColor Green -ForegroundColor Black
 Write-Host "Running Get-WindowsUpdate" -BackgroundColor Magenta
-Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose
+Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose -NotTitle "Silverlight"
+Get-WindowsUpdate -Hide -Title "Silverlight"
 
 # Add 2rd stage to RunOnce Registry Key
 $value = "$($dir)\$($nextStage)"
 $name = "!$($nextStage)"
+New-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion" -Name "RunOnce"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value -Force
 Restart-Computer -Force -Confirm:$false
