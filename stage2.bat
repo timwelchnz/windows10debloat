@@ -16,6 +16,9 @@ Write-Host "Re-running Windows Update as it then installs the latest Optional Up
 Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose
 Read-Host "Did Get-WindowsUpdate work?"
 
+# http://download.windowsupdate.com/d/msdownload/update/software/updt/2021/11/windows10.0-kb5007253-x64_56eae3ea4ddb22105db274b6d903cd73dfaea5ed.msu
+# x64 Feature Update
+
 Write-Host "Cleaning Up Temp Files"
 $clnmgr = "cleanmgr.exe"
 $arguments = "/AUTOCLEAN"
