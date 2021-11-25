@@ -327,12 +327,13 @@ Write-Host "Installed NuGet" -BackgroundColor Green -ForegroundColor Black
 Install-Module PSWindowsUpdate -Confirm:$false -Force
 Write-Host "Installed PSWindowsUpdate" -BackgroundColor Green -ForegroundColor Black
 Write-Host "Running Get-WindowsUpdate" -BackgroundColor Magenta
-Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose -NotTitle "Silverlight"
 Get-WindowsUpdate -Hide -Title "Silverlight"
+Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose -NotTitle "Silverlight"
+
 
 # Add 2rd stage to RunOnce Registry Key
 $value = "$($dir)\$($nextStage)"
 $name = "!$($nextStage)"
-New-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion" -Name "RunOnce"
+New-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion" -Name "RunOnce" -Force
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name $name -Value $value -Force
 Restart-Computer -Force -Confirm:$false
