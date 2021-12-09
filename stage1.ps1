@@ -136,36 +136,6 @@ ForEach ($AppExtension in $AppExtensions) {
 }
 Write-Host "Removed Paint3D from Explorer Context" -BackgroundColor Green -ForegroundColor Black
 
-Write-Host "About to ask to continue to step through the rest of the provisoned apps"
-$continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining AppX Packages?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
-# Write-Host "Do you want to continue through remaining AppX Packages? [y]es or [n]o"
-# $continue = $Host.UI.RawUI.ReadKey()
-Switch ($continue) {
-    'Yes' {
-        # Now retrieve remaining Provisioned Packages...
-        $ProvisionedFiles = @(Get-ProvisionedAppxPackage -Online | Select-Object DisplayName)
-
-        ForEach ($files in $ProvisionedFiles) {
-            $msg   = "Remove " + $files.DisplayName + "?"
-            $remove = [System.Windows.Forms.MessageBox]::Show($msg,"Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
-            switch  ($remove) {
-              'Yes' {
-                Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $files.DisplayName | Remove-ProvisionedAppxPackage -Online -AllUsers | Out-Null
-                Write-Host "REMOVED: $files.DisplayName" -BackgroundColor Red
-                  }
-              'No' {
-                Write-Host "Kept: $files.DisplayName" -BackgroundColor Green
-                  }
-            }
-        }
-        Write-Host "Completed stepping through the rest of the provisoned apps"
-    }
-    'No' {
-    }
-
-}
-
-
 $StartLayoutStr = @"
 <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
   <LayoutOptions StartTileGroupCellWidth="6" />
@@ -222,13 +192,15 @@ catch {
   Add-AppxPackage -Path $download_path -confirm:$false
 }
 
-Write-Host "Installing Google Chrome" -BackgroundColor Green -ForegroundColor Black
-Winget install -e 'Google.Chrome' -h --accept-source-agreements --accept-package-agreements | Out-Host
-Write-Host "Installing Adobe Acrobat Reader" -BackgroundColor Green -ForegroundColor Black
-Winget install -e 'Adobe.Acrobat.Reader.32-bit' -h --accept-source-agreements --accept-package-agreements | Out-Host
-Write-Host "Installing VideoLAN VLC" -BackgroundColor Green -ForegroundColor Black
-#Installing this prevents users from installing junkware which may contain malware etc when trying to view media.
-Winget install -e 'VideoLAN.VLC' -h --accept-source-agreements --accept-package-agreements | Out-Host
+$Applications = @(
+  "Google.Chrome"
+  "Adobe.Acrobat.Reader.32-bit"
+  "VideoLAN.VLC"
+)
+Write-Host "Installing Applications" -BackgroundColor Green -ForegroundColor Black
+Foreach ($application in $Applications) {
+  Winget install -e $application -h --accept-source-agreements --accept-package-agreements
+}
 
 #Ads deliver malware and lead users to install fake programs.
 Write-Host "Installing UBlock Origin Extension in Google Chrome" -BackgroundColor Blue
@@ -350,6 +322,33 @@ elseif ($Manufacturer -eq "LENOVO") {
 }
 else {
   Write-Host "This host is not an HP or a Lenovo" -BackgroundColor Magenta
+  $continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining Provisioned Applications?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
+  # Write-Host "Do you want to continue through remaining AppX Packages? [y]es or [n]o"
+  # $continue = $Host.UI.RawUI.ReadKey()
+  Switch ($continue) {
+      'Yes' {
+          # Now retrieve remaining Provisioned Packages...
+          $ProvisionedFiles = @(Get-ProvisionedAppxPackage -Online | Select-Object DisplayName)
+  
+          ForEach ($files in $ProvisionedFiles) {
+              $msg   = "Remove " + $files.DisplayName + "?"
+              $remove = [System.Windows.Forms.MessageBox]::Show($msg,"Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
+              switch  ($remove) {
+                'Yes' {
+                  Get-ProvisionedAppxPackage -Online | Where-Object DisplayName -EQ $files.DisplayName | Remove-ProvisionedAppxPackage -Online -AllUsers | Out-Null
+                  Write-Host "REMOVED: $files.DisplayName" -BackgroundColor Red
+                    }
+                'No' {
+                  Write-Host "Kept: $files.DisplayName" -BackgroundColor Green
+                    }
+              }
+          }
+          Write-Host "Completed stepping through the rest of the provisoned apps"
+      }
+      'No' {
+      }
+  
+  }
   Read-Host -Promt "Waiting for input"
 }
 
