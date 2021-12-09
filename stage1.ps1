@@ -266,11 +266,9 @@ $ServiceManager.ClientApplicationID = "Update Other Microsoft Products"
 $NewService = $ServiceManager.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
 
 Write-Host "Checking if HP and remove bloatware..." -BackgroundColor Blue
-Read-Host -Promt "Waiting for input"
 $Manufacturer = (Get-CimInstance -ClassName Win32_ComputerSystem).Manufacturer
 If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   Write-Host "This is an HP and we're about to remove bloatware..." -BackgroundColor Blue
-  Read-Host -Promt "Waiting for input"
   # List of built-in apps to remove
   $UninstallPackages = @(
       "AD2F1837.HPJumpStarts"
@@ -314,8 +312,44 @@ If ($Manufacturer -eq "HP" -Or $Manufacturer -eq "Hewlett-Packard") {
   Remove-Item -LiteralPath "C:\Program Files (x86)\Online Services" -Force -Recurse -ErrorAction SilentlyContinue
   Remove-Item -Path "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Proefversies.lnk" -Force -Recurse -ErrorAction SilentlyContinue
 }
+elseif ($Manufacturer -eq "LENOVO") {
+  Write-Host "This is an Lenovo and we're about to remove bloatware..." -BackgroundColor Blue
+  Read-Host -Promt "Waiting for input"
+  # List of built-in apps to remove
+  $UninstallPackages = @(
+      "4505Fortemedia.FMAPOControl"
+      "E046963F.AIMeetingManager"
+      "MirametrixInc.GlancebyMirametrix"
+  )
+  $InstalledPackages = Get-AppxPackage -AllUsers | Where-Object {($UninstallPackages -contains $_.Name)} 
+  $ProvisionedPackages = Get-AppxProvisionedPackage -Online | Where-Object {($UninstallPackages -contains $_.DisplayName)} 
+  ForEach ($ProvPackage in $ProvisionedPackages) {
+    Write-Host -Object "Attempting to remove provisioned package: [$($ProvPackage.DisplayName)]..."
+    Try {
+        $Null = Remove-AppxProvisionedPackage -PackageName $ProvPackage.PackageName -Online -ErrorAction Stop
+        Write-Host -Object "Successfully removed provisioned package: [$($ProvPackage.DisplayName)]"
+    }
+    Catch {Write-Warning -Message "Failed to remove provisioned package: [$($ProvPackage.DisplayName)]"}
+  }
+  ForEach ($AppxPackage in $InstalledPackages) {
+    Write-Host -Object "Attempting to remove Appx package: [$($AppxPackage.Name)]..."
+    Try {
+        $Null = Remove-AppxPackage -Package $AppxPackage.PackageFullName -AllUsers -ErrorAction Stop
+        Write-Host -Object "Successfully removed Appx package: [$($AppxPackage.Name)]"
+    }
+    Catch {Write-Warning -Message "Failed to remove Appx package: [$($AppxPackage.Name)]"}
+  }
+  #Download McAfee removal tool
+  $url = "https://git.io/JDTpL"
+  $KillMcAfee = "C:\temp\KillMcAfee.zip"
+  Invoke-WebRequest -Uri $url -OutFile $KillMcAfee -UseBasicParsing
+  Get-Item $KillMcAfee | Unblock-File
+  Expand-Archive -Path $KillMcAfee -DestinationPath "C:\temp"
+  Start-Process -Wait -FilePath “C:\temp\KillMcAfee\Mccleanup.exe” -ArgumentList “-p StopServices,MFSY,PEF,MXD,CSP,Sustainability,MOCP,MFP,APPSTATS,Auth,EMproxy,FWdiver,HW,MAS,MAT,MBK,MCPR,McProxy,McSvcHost,VUL,MHN,MNA,MOBK,MPFP,MPFPCU,MPS,SHRED,MPSCU,MQC,MQCCU,MSAD,MSHR,MSK,MSKCU,MWL,NMC,RedirSvc,VS,REMEDIATION,MSC,YAP,TRUEKEY,LAM,PCB,Symlink,SafeConnect,MGS,WMIRemover,RESIDUE -v -s” -WindowStyle Minimized
+  Read-Host -Promt "At this point we should have silently remove McAfee etc"
+}
 else {
-  Write-Host "This host is not an HP" -BackgroundColor Magenta
+  Write-Host "This host is not an HP or a Lenovo" -BackgroundColor Magenta
   Read-Host -Promt "Waiting for input"
 }
 
