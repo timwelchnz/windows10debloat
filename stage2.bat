@@ -20,8 +20,24 @@ Get-WindowsUpdate -install -acceptall -IgnoreReboot -Confirm:$false -Verbose
 # x64 Feature Update
 
 Write-Host "Cleaning Up Temp Files"
+
+# From https://docs.microsoft.com/en-us/windows/win32/lwef/disk-cleanup
+# DDEVCF_DOSUBDIRS (0x00000001). Search and remove recursively.
+# DDEVCF_REMOVEAFTERCLEAN (0x00000002). After the handler is run once, remove it from the registry.
+# DDEVCF_REMOVEREADONLY (0x00000004). Remove files that meet the search criteria even if they are read-only.
+# DDEVCF_REMOVESYSTEM (0x00000008). Remove files that meet the search criteria even if they are system files.
+# DDEVCF_REMOVEHIDDEN (0x00000010). Remove files that meet the search criteria even if they are hidden files.
+
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Temporary Setup Files' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Previous Installations' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Delivery Optimization Files' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Recycle Bin' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Temporary Setup Files' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Windows ESD installation files' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Update Cleanup' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
+
 $clnmgr = "cleanmgr.exe"
-$arguments = "/VERYLOWDISK"
+$arguments = "/SAGERUN:1337"
 start-process $clnmgr $arguments -NoNewWindow -Wait
 Read-Host "Did CleanMgr Work?"
 
