@@ -199,7 +199,7 @@ $Applications = @(
 )
 Write-Host "Installing Applications" -BackgroundColor Green -ForegroundColor Black
 Foreach ($application in $Applications) {
-  Winget install -e $application -h --accept-source-agreements --accept-package-agreements
+  Winget install -e $application -h --accept-source-agreements --accept-package-agreements --force
 }
 
 #Ads deliver malware and lead users to install fake programs.
