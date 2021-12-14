@@ -35,6 +35,7 @@ New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Temporary Setup Files' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Windows ESD installation files' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Update Cleanup' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Windows Defender' -PropertyType 'DWORD' -Force -Name 'StateFlags1337' -Value 0x2
 
 $clnmgr = "cleanmgr.exe"
 $arguments = "/SAGERUN:1337"
