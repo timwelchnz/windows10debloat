@@ -24,6 +24,22 @@ If($null -eq $TaskBar.GetValue($Name)) {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
+$name = "{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
+$value = "0"
+
+# If registry path doesn't exist, create it.
+If (-NOT (Test-Path $registryPath)) {
+    New-Item $registryPath | Out-Null
+}
+
+New-ItemProperty -Path $registryPath `
+    -Name $name `
+    -Value $value `
+    -PropertyType ExpandString `
+    -Force | Out-Null
+
+
 #Show My Computer on the Desktop
 $Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 $Name = "{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
@@ -49,17 +65,8 @@ If($null -eq $TaskBar.GetValue($Name)) {
    Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
 
-#Remove Cortana Button - This is unneeded as we remove Cortana entirely. It doesn't work in NZ
-# $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
-# $Name = "ShowCortanaButton"
-# $value = "0"
-# $Cortana = Get-Item -Path $registryPath
-# If($null -eq $Cortana.GetValue($Name)) {
-#   New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWord
-# } else {
-#   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
-# }
-# Write-Host "Removed Cortana Button"
+#Remove suggestions from the Start Menu
+REG ADD "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338388Enabled" /t REG_DWORD /d 1 /f
 
 #Rename PC and reboot
 If (Test-Path -Path "C:\temp\computername.txt") {
