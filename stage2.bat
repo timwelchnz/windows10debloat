@@ -40,7 +40,7 @@ New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer
 $clnmgr = "cleanmgr.exe"
 $arguments = "/SAGERUN:1337"
 start-process $clnmgr $arguments -NoNewWindow -Wait
-Read-Host "Did CleanMgr Work?"
+# Read-Host "Did CleanMgr Work?"
 
 # Add 3rd stage to RunOnce Registry Key
 $value = "$($dir)\$($nextStage)"
