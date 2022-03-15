@@ -30,6 +30,21 @@ If ("" -eq $NewComputerName){
 add-content -Path "$($dir)\computername.txt" $NewComputerName
 Write-Host "New computername after OOBE will be: $NewComputerName"
 
+$InstallITCTools = Read-Host "Would you like IT Centre Tools installed? Y\[N]"
+If ("y" -eq $InstallITCTools.ToLower()){
+  #Run IT Centre Tools installation
+  New-Item -Path "c:\" -Name "IT Centre" -ItemType "directory"
+  $Path = "\\172.20.20.2\Temp"
+  $Destination = "C:\IT Centre"
+  $AnyDesk = "\AnyDesk\IT Centre AnyDesk Setup.exe"
+  $SolarWinds = "\SolarWinds\AGENT.EXE"
+  
+  Copy-Item -Path $Path$AnyDesk -Destination $Destination -Force
+  Copy-Item -Path $Path$SolarWinds -Destination $Destination -Force
+  $InstallFile = $AnyDesk.split("\")[2]
+  start-process -filepath "$Destination\$InstallFile" -wait -passthru
+} 
+
 #Add Windows Forms Assembly as it seems to be missing on a lot of machines
 Add-Type -AssemblyName System.Windows.Forms
 

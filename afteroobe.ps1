@@ -1,5 +1,5 @@
 # Tim Welch
-# 28/06/2021
+# 16/03/2022
 # Script to run immediately after OOBE to clean things up.
 
 #Set Search Bar to Icon
@@ -23,22 +23,6 @@ If($null -eq $TaskBar.GetValue($Name)) {
 } else {
   Set-ItemProperty -Path $registryPath -Name $Name -Value $value
 }
-
-$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
-$name = "{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
-$value = "0"
-
-# If registry path doesn't exist, create it.
-If (-NOT (Test-Path $registryPath)) {
-    New-Item $registryPath | Out-Null
-}
-
-New-ItemProperty -Path $registryPath `
-    -Name $name `
-    -Value $value `
-    -PropertyType ExpandString `
-    -Force | Out-Null
-
 
 #Show My Computer on the Desktop
 $Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
@@ -75,6 +59,14 @@ If (Test-Path -Path "C:\temp\computername.txt") {
 }
 else {
   Write-Host "Unable to rename PC - do it manually"
+}
+
+# Install RMM Agent if it has been requested and copied over
+$ITCFolder = "C:\IT Centre"
+$SolarWinds = "AGENT.EXE"
+$Exist = (Test-Path -Path "$ITCFolder\$SolarWinds")
+If($Exist){
+  start-process -filepath "$ITCFolder\$SolarWinds" -wait -passthru
 }
 
 #Unpin Microsoft Store
