@@ -338,6 +338,7 @@ elseif ($Manufacturer -eq "LENOVO") {
 }
 else {
   Write-Host "This host is not an HP or a Lenovo" -BackgroundColor Magenta
+  Write-Host "Watch out for a Windows Message being under this Window about now..."
   $continue = [System.Windows.Forms.MessageBox]::Show("Do you want to continue through remaining Provisioned Applications?","Batch Windows 10 App Removal", "YesNo" , "Information" , "Button1")
   # Write-Host "Do you want to continue through remaining AppX Packages? [y]es or [n]o"
   # $continue = $Host.UI.RawUI.ReadKey()
@@ -365,7 +366,6 @@ else {
       }
   
   }
-  Read-Host -Promt "Waiting for input"
 }
 
 Clear-Host 
