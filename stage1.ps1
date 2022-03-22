@@ -37,7 +37,7 @@ If ("y" -eq $InstallITCTools.ToLower()){
   $Path = "\\172.20.20.2\Temp"
   $Destination = "C:\IT Centre"
   $AnyDesk = "\AnyDesk\IT Centre AnyDesk Setup.exe"
-  $SolarWinds = "\SolarWinds\AGENT.EXE"
+  $SolarWinds = "\N-Able\AGENT.EXE"
   
   Copy-Item -Path $Path$AnyDesk -Destination $Destination -Force
   Copy-Item -Path $Path$SolarWinds -Destination $Destination -Force
