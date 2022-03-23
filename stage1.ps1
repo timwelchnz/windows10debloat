@@ -41,9 +41,7 @@ If ("y" -eq $InstallITCTools.ToLower()){
   
   Copy-Item -Path $Path$AnyDesk -Destination $Destination -Force
   Copy-Item -Path $Path$SolarWinds -Destination $Destination -Force
-  $InstallFile = $AnyDesk.split("\")[2]
-  start-process -filepath "$Destination\$InstallFile" -wait -passthru
-  #Installation of RMM Agent takes place after OOBE so that the machine has the correct name
+  #Installation of Agents takes place after OOBE so that the machine has the correct name
 } 
 
 #Add Windows Forms Assembly as it seems to be missing on a lot of machines
