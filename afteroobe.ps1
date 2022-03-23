@@ -69,6 +69,7 @@ If($Exist){
   start-process -filepath "$ITCFolder\$SolarWinds" -wait -passthru
 }
 
+# Install AnyDesk
 $AnyDesk = "IT Centre AnyDesk Setup.exe"
 $Exist = (Test-Path -Path "$ITCFolder\$AnyDesk")
 $arguments = "--create-shortcuts --create-desktop-icon --silent"
