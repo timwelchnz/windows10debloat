@@ -72,7 +72,7 @@ If($Exist){
 # Install AnyDesk
 $AnyDesk = "IT Centre AnyDesk Setup.exe"
 $Exist = (Test-Path -Path "$ITCFolder\$AnyDesk")
-$arguments = "--create-shortcuts --create-desktop-icon --silent"
+$arguments = "/S"
 If($Exist){
   start-process -filepath "$ITCFolder\$AnyDesk" -ArgumentList $arguments -wait -passthru
 }
