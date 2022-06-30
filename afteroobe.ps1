@@ -61,22 +61,6 @@ else {
   Write-Host "Unable to rename PC - do it manually"
 }
 
-# Install RMM Agent if it has been requested and copied over
-$ITCFolder = "C:\IT Centre"
-$SolarWinds = "AGENT.EXE"
-$Exist = (Test-Path -Path "$ITCFolder\$SolarWinds")
-If($Exist){
-  start-process -filepath "$ITCFolder\$SolarWinds" -wait -passthru
-}
-
-# Install AnyDesk
-$AnyDesk = "IT Centre AnyDesk Setup.exe"
-$Exist = (Test-Path -Path "$ITCFolder\$AnyDesk")
-$arguments = "/S"
-If($Exist){
-  start-process -filepath "$ITCFolder\$AnyDesk" -ArgumentList $arguments -wait -passthru
-}
-
 #Unpin Microsoft Store
 $appname = "Microsoft Store"
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where-Object{$_.Name -eq $appname}).Verbs() | Where-Object{$_.Name.replace('&','') -match 'Unpin from taskbar'} | ForEach-Object{$_.DoIt(); $exec = $true}
