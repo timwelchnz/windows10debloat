@@ -30,20 +30,6 @@ If ("" -eq $NewComputerName){
 add-content -Path "$($dir)\computername.txt" $NewComputerName
 Write-Host "New computername after OOBE will be: $NewComputerName"
 
-$InstallITCTools = Read-Host "Would you like IT Centre Tools installed? Y\[N]"
-If ("y" -eq $InstallITCTools.ToLower()){
-  #Run IT Centre Tools installation
-  New-Item -Path "c:\" -Name "IT Centre" -ItemType "directory"
-  $Path = "\\172.20.20.2\Temp"
-  $Destination = "C:\IT Centre"
-  $AnyDesk = "\AnyDesk\IT Centre AnyDesk Setup.exe"
-  $SolarWinds = "\N-Able\AGENT.EXE"
-  
-  Copy-Item -Path $Path$AnyDesk -Destination $Destination -Force
-  Copy-Item -Path $Path$SolarWinds -Destination $Destination -Force
-  #Installation of Agents takes place after OOBE so that the machine has the correct name
-} 
-
 #Add Windows Forms Assembly as it seems to be missing on a lot of machines
 Add-Type -AssemblyName System.Windows.Forms
 
@@ -208,8 +194,8 @@ catch {
 
 $Applications = @(
   "Google.Chrome"
-  "Adobe.Acrobat.Reader.32-bit"
   "VideoLAN.VLC"
+  "Adobe.Acrobat.Reader.64-bit"
 )
 Write-Host "Installing Applications" -BackgroundColor Green -ForegroundColor Black
 Foreach ($application in $Applications) {
